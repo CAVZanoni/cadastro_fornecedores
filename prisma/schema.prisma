@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Licitacao {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  municipioId Int?
+  municipio   Municipio? @relation(fields: [municipioId], references: [id])
+  propostas Proposta[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Fornecedor {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  contato   String?
+  whatsapp  String?
+  email     String?
+  cnpj      String?
+  propostas Proposta[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Produto {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  unidade   String
+  itens     ItemProposta[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Proposta {
+  id           Int      @id @default(autoincrement())
+  numero       String
+  licitacaoId  Int
+  licitacao    Licitacao @relation(fields: [licitacaoId], references: [id])
+  fornecedorId Int
+  fornecedor   Fornecedor @relation(fields: [fornecedorId], references: [id])
+  itens        ItemProposta[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ItemProposta {
+  id            Int      @id @default(autoincrement())
+  quantidade    Float
+  precoUnitario Float
+  precoTotal    Float? 
+
+  propostaId    Int
+  proposta      Proposta @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+  produtoId     Int
+  produto       Produto  @relation(fields: [produtoId], references: [id])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Municipio {
+  id         Int      @id @default(autoincrement())
+  codigoIBGE String   @unique
+  nome       String
+  uf         String
+  nomeCompleto String  // formato "Cidade/UF"
+  licitacoes Licitacao[]
+  createdAt  DateTime @default(now())
+}
