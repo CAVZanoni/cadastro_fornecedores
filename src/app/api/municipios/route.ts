@@ -13,8 +13,8 @@ export async function GET(request: Request) {
         const municipios = await prisma.municipio.findMany({
             where: {
                 OR: [
-                    { nome: { contains: search } },
-                    { nomeCompleto: { contains: search } }
+                    { nome: { contains: search, mode: 'insensitive' } },
+                    { nomeCompleto: { contains: search, mode: 'insensitive' } }
                 ]
             },
             take: 20,
