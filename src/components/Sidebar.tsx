@@ -10,6 +10,7 @@ const links = [
     { name: 'Fornecedores', href: '/fornecedores', icon: Users },
     { name: 'Produtos', href: '/produtos', icon: Package },
     { name: 'Propostas', href: '/propostas', icon: FileText },
+    { name: 'Relatórios', href: '/relatorios', icon: FileText },
 ]
 
 export function Sidebar() {

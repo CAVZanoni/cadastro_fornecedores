@@ -13,7 +13,8 @@ export async function PUT(
             where: { id: Number(id) },
             data: {
                 nome: json.nome,
-                municipioId: json.municipioId ? Number(json.municipioId) : undefined
+                municipioId: json.municipioId ? Number(json.municipioId) : undefined,
+                data: json.data ? new Date(json.data) : undefined
             }
         })
         return NextResponse.json(updated)

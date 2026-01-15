@@ -28,6 +28,7 @@ export async function GET() {
         const licitacoesData = licitacoes.map(l => ({
             ID: l.id,
             Nome: l.nome,
+            'Data': l.data ? l.data.toISOString().split('T')[0] : '',
             'Criado em': l.createdAt.toISOString().split('T')[0]
         }))
         const wsLicitacoes = XLSX.utils.json_to_sheet(licitacoesData)
@@ -58,6 +59,7 @@ export async function GET() {
         const propostasData = propostas.map(p => ({
             ID: p.id,
             Número: p.numero,
+            'Data': p.data ? p.data.toISOString().split('T')[0] : '',
             Licitação: p.licitacao?.nome || '',
             Fornecedor: p.fornecedor?.nome || '',
             'Total Itens': p.itens?.length || 0,
@@ -72,6 +74,7 @@ export async function GET() {
             p.itens?.forEach(item => {
                 itensData.push({
                     'Proposta': p.numero,
+                    'Data': p.data ? p.data.toISOString().split('T')[0] : '',
                     'Produto': item.produto?.nome || '',
                     'Unidade': item.produto?.unidade || '',
                     'Quantidade': item.quantidade,

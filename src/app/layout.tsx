@@ -30,10 +30,8 @@ export default function RootLayout({
       >
         <div className="flex min-h-screen">
           <Sidebar />
-          <main className="flex-1 ml-64 overflow-auto">
-            <div className="max-w-7xl mx-auto p-8">
-              {children}
-            </div>
+          <main className="flex-1 ml-64 overflow-hidden h-screen bg-slate-50">
+            {children}
           </main>
         </div>
       </body>

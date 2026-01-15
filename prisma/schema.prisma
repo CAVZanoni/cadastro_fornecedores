@@ -16,6 +16,7 @@ model Licitacao {
   municipioId Int?
   municipio   Municipio? @relation(fields: [municipioId], references: [id])
   propostas Proposta[]
+  data      DateTime @default(now()) // Manual date field
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -49,6 +50,8 @@ model Proposta {
   fornecedorId Int
   fornecedor   Fornecedor @relation(fields: [fornecedorId], references: [id])
   itens        ItemProposta[]
+  data         DateTime @default(now()) // Manual date field
+  arquivoUrl   String?  // File upload URL
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

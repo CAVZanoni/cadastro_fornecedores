@@ -28,7 +28,9 @@ export async function POST(request: Request) {
             data: {
                 numero,
                 licitacaoId: Number(licitacaoId),
-                fornecedorId: Number(fornecedorId)
+                fornecedorId: Number(fornecedorId),
+                data: body.data ? new Date(body.data) : undefined,
+                arquivoUrl: body.arquivoUrl || undefined
             }
         })
         return NextResponse.json(data)

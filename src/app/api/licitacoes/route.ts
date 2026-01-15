@@ -32,7 +32,8 @@ export async function POST(request: Request) {
         const licitacao = await prisma.licitacao.create({
             data: {
                 nome: json.nome,
-                municipioId: Number(json.municipioId)
+                municipioId: Number(json.municipioId),
+                data: json.data ? new Date(json.data) : undefined
             }
         })
         return NextResponse.json(licitacao)
