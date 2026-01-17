@@ -71,7 +71,6 @@ export default function RelatoriosPage() {
     }, [])
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         fetchData()
 
         const onFocus = () => fetchData()

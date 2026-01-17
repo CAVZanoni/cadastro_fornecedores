@@ -7,7 +7,7 @@ export async function GET() {
     try {
         const data = await prisma.fornecedor.findMany({ orderBy: { createdAt: 'desc' } })
         return NextResponse.json(data)
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao buscar fornecedores' }, { status: 500 })
     }
 }
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
             data: { nome, contato, whatsapp, email, cnpj }
         })
         return NextResponse.json(data)
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao criar fornecedor' }, { status: 500 })
     }
 }

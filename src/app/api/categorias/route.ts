@@ -9,7 +9,7 @@ export async function GET() {
             orderBy: { nome: 'asc' }
         })
         return NextResponse.json(data)
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
     }
 }
@@ -27,8 +27,8 @@ export async function POST(request: Request) {
             data: { nome }
         })
         return NextResponse.json(data)
-    } catch (error) {
-        console.error(error)
+    } catch (_error) {
+        console.error(_error)
         return NextResponse.json({ error: 'Erro ao criar categoria' }, { status: 500 })
     }
 }

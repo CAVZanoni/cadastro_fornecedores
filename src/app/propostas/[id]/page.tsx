@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useCallback } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Plus, Trash2, ArrowLeft, Pencil } from 'lucide-react'
 import Link from 'next/link'
@@ -17,6 +17,7 @@ type ItemProposta = {
 type PropostaDetalhe = {
     id: number
     numero: string
+    licitacaoId: number
     licitacao: { nome: string }
     fornecedor: { nome: string }
     itens: ItemProposta[]
@@ -44,23 +45,25 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
         observacoes: ''
     })
 
-    useEffect(() => {
-        fetchData()
-    }, [id])
-
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         try {
             const propRes = await fetch('/api/propostas')
             const allProps = await propRes.json()
-            const current = allProps.find((p: any) => p.id === Number(id))
+            const current = allProps.find((p: PropostaDetalhe) => p.id === Number(id))
             setProposta(current)
 
             const prodRes = await fetch('/api/produtos')
             setProdutos(await prodRes.json())
+        } catch (_error) {
+            console.error('Error fetching data')
         } finally {
             setLoading(false)
         }
-    }
+    }, [id])
+
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -110,7 +113,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
         try {
             await fetch(`/api/itens/${itemId}`, { method: 'DELETE' })
             fetchData()
-        } catch (e) { console.error(e) }
+        } catch (_error) { console.error('Error deleting item') }
     }
 
     async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -139,10 +142,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...proposta,
-                    licitacaoId: (proposta as any).licitacaoId, // Ensure IDs are present if needed, though usually partial updates work if API handles it. 
-                    // Actually API expects foreign keys if we send the whole object? 
-                    // Let's modify the API logic or just send specific fields. 
-                    // The PUT endpoint updates fields present in body.
+                    licitacaoId: proposta?.licitacaoId,
                     arquivoUrl: url
                 })
             })
@@ -180,9 +180,9 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                                 {proposta.licitacao?.nome} • {proposta.fornecedor?.nome}
                             </p>
                             {proposta.observacoes && (
-                                <p className="text-slate-600 text-sm mt-1 bg-blue-50 p-2 rounded border border-blue-100 italic">
+                                <div className="text-slate-600 text-sm mt-1 bg-blue-50 p-2 rounded border border-blue-100 italic">
                                     <strong>Obs:</strong> {proposta.observacoes}
-                                </p>
+                                </div>
                             )}
                         </div>
                     </div>

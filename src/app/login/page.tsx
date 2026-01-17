@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
@@ -30,8 +30,8 @@ export default function LoginPage() {
                 router.push('/')
                 router.refresh()
             }
-        } catch (err) {
-            setError('Ocorreu um erro ao tentar fazer login.')
+        } catch (_err) {
+            setError('Ocorreu um erro inesperado')
         } finally {
             setLoading(false)
         }

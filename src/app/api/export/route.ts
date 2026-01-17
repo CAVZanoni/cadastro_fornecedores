@@ -6,42 +6,40 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        // Fetch all data
-        const [licitacoes, fornecedores, produtos, propostas] = await Promise.all([
-            prisma.licitacao.findMany({
-                include: { municipio: true },
-                orderBy: { id: 'asc' }
-            }),
-            prisma.fornecedor.findMany({ orderBy: { id: 'asc' } }),
-            prisma.produto.findMany({
-                include: { categoria: true, unidade: true },
-                orderBy: { id: 'asc' }
-            }),
-            prisma.proposta.findMany({
-                include: {
-                    licitacao: { include: { municipio: true } },
-                    fornecedor: true,
-                    itens: {
-                        include: {
-                            produto: {
-                                include: { categoria: true, unidade: true }
-                            }
+        // Fetch all data with relations
+        const licitacoes = await prisma.licitacao.findMany({
+            include: { municipio: true },
+            orderBy: { id: 'asc' }
+        })
+        const fornecedores = await prisma.fornecedor.findMany({ orderBy: { id: 'asc' } })
+        const produtos = await prisma.produto.findMany({
+            include: { categoria: true, unidade: true },
+            orderBy: { id: 'asc' }
+        })
+        const propostas = await prisma.proposta.findMany({
+            include: {
+                licitacao: { include: { municipio: true } },
+                fornecedor: true,
+                itens: {
+                    include: {
+                        produto: {
+                            include: { categoria: true, unidade: true }
                         }
                     }
-                },
-                orderBy: { id: 'asc' }
-            })
-        ])
+                }
+            },
+            orderBy: { id: 'asc' }
+        })
 
         // Create workbook
         const wb = XLSX.utils.book_new()
 
         // Sheet 1: Relatório Geral (Flattened)
-        const relatorioData: any[] = []
-        propostas.forEach(p => {
-            p.itens?.forEach(item => {
+        const relatorioData: Record<string, string | number | null>[] = []
+        propostas.forEach((p: any) => {
+            p.itens?.forEach((item: any) => {
                 relatorioData.push({
-                    'Data': p.data ? p.data.toISOString().split('T')[0] : '',
+                    'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
                     'Município': p.licitacao?.municipio?.nomeCompleto || '-',
                     'Licitação': p.licitacao?.nome || '',
                     'Nº Proposta': p.numero,
@@ -61,12 +59,12 @@ export async function GET() {
         XLSX.utils.book_append_sheet(wb, wsRelatorio, 'Relatório Geral')
 
         // Sheet 2: Licitações
-        const licitacoesData = licitacoes.map(l => ({
+        const licitacoesData = licitacoes.map((l: any) => ({
             ID: l.id,
             Nome: l.nome,
             'Município': l.municipio?.nomeCompleto || '-',
-            'Data': l.data ? l.data.toISOString().split('T')[0] : '',
-            'Criado em': l.createdAt.toISOString().split('T')[0]
+            'Data': l.data ? new Date(l.data).toISOString().split('T')[0] : '',
+            'Criado em': l.createdAt ? new Date(l.createdAt).toISOString().split('T')[0] : ''
         }))
         const wsLicitacoes = XLSX.utils.json_to_sheet(licitacoesData)
         XLSX.utils.book_append_sheet(wb, wsLicitacoes, 'Licitações')
@@ -84,7 +82,7 @@ export async function GET() {
             return n.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3')
         }
 
-        const fornecedoresData = fornecedores.map(f => ({
+        const fornecedoresData = fornecedores.map((f: any) => ({
             ID: f.id,
             Nome: f.nome,
             Contato: f.contato || '',
@@ -96,7 +94,7 @@ export async function GET() {
         XLSX.utils.book_append_sheet(wb, wsFornecedores, 'Fornecedores')
 
         // Sheet 4: Produtos
-        const produtosData = produtos.map(p => ({
+        const produtosData = produtos.map((p: any) => ({
             ID: p.id,
             Nome: p.nome,
             Categoria: p.categoria?.nome || '-',
@@ -106,26 +104,26 @@ export async function GET() {
         XLSX.utils.book_append_sheet(wb, wsProdutos, 'Produtos')
 
         // Sheet 5: Propostas
-        const propostasData = propostas.map(p => ({
+        const propostasData = propostas.map((p: any) => ({
             ID: p.id,
             Número: p.numero,
-            'Data': p.data ? p.data.toISOString().split('T')[0] : '',
+            'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
             Licitação: p.licitacao?.nome || '',
             Fornecedor: p.fornecedor?.nome || '',
             'Total Itens': p.itens?.length || 0,
-            'Valor Total': p.itens?.reduce((acc, item) => acc + (item.precoTotal || 0), 0) || 0,
+            'Valor Total': p.itens?.reduce((acc: number, item: any) => acc + (item.precoTotal || 0), 0) || 0,
             'Obs': p.observacoes || ''
         }))
         const wsPropostas = XLSX.utils.json_to_sheet(propostasData)
         XLSX.utils.book_append_sheet(wb, wsPropostas, 'Propostas')
 
         // Sheet 6: Itens de Propostas (detalhado)
-        const itensData: any[] = []
-        propostas.forEach(p => {
-            p.itens?.forEach(item => {
+        const itensData: Record<string, string | number | null>[] = []
+        propostas.forEach((p: any) => {
+            p.itens?.forEach((item: any) => {
                 itensData.push({
                     'Proposta': p.numero,
-                    'Data': p.data ? p.data.toISOString().split('T')[0] : '',
+                    'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
                     'Produto': item.produto?.nome || '',
                     'Categoria': item.produto?.categoria?.nome || '-',
                     'Unidade': item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-',
@@ -153,8 +151,8 @@ export async function GET() {
                 'Content-Disposition': `attachment; filename="propostas_export_${new Date().toISOString().split('T')[0]}.xlsx"`
             }
         })
-    } catch (error) {
-        console.error('Export error:', error)
+    } catch (_error) {
+        console.error('Export error:', _error)
         return NextResponse.json({ error: 'Erro ao exportar dados' }, { status: 500 })
     }
 }

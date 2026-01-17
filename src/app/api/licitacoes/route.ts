@@ -13,7 +13,7 @@ export async function GET() {
             orderBy: { id: 'desc' }
         })
         return NextResponse.json(licitacoes)
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao buscar licitações' }, { status: 500 })
     }
 }
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
             }
         })
         return NextResponse.json(licitacao)
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao criar licitação' }, { status: 500 })
     }
 }

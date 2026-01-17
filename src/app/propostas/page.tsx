@@ -1,12 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
-import { Plus, Eye, Pencil, Trash2, Paperclip } from 'lucide-react'
-
-// ... (rest of imports)
-
-// ... (inside the table row)
-
+import { Trash2, Plus, Download, Eye, Pencil, Paperclip } from 'lucide-react'
 import Link from 'next/link'
 
 type Proposta = {
@@ -112,8 +107,8 @@ export default function PropostasPage() {
                 resetForm()
                 refreshData()
             }
-        } catch (error) {
-            console.error(error)
+        } catch (_error) {
+            console.error(_error)
             alert('Erro ao salvar')
         } finally {
             setSubmitting(false)
@@ -148,7 +143,7 @@ export default function PropostasPage() {
             } else {
                 alert('Erro ao excluir')
             }
-        } catch (error) {
+        } catch (_error) {
             alert('Erro ao excluir')
         }
     }

@@ -57,8 +57,8 @@ export default function LicitacoesPage() {
                 setMunicipioResults(data)
                 setShowResults(true)
             }
-        } catch (error) {
-            console.error('Failed to search municipios', error)
+        } catch (_error) {
+            console.error('Failed to search municipios', _error)
         }
     }
 
@@ -137,7 +137,7 @@ export default function LicitacoesPage() {
                 const err = await res.json()
                 alert(err.error || 'Erro ao excluir')
             }
-        } catch (error) {
+        } catch (_error) {
             alert('Erro ao excluir')
         }
     }

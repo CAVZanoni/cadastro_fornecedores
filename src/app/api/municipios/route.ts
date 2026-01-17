@@ -21,7 +21,7 @@ export async function GET(request: Request) {
             orderBy: { nome: 'asc' }
         })
         return NextResponse.json(municipios)
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao buscar municípios' }, { status: 500 })
     }
 }

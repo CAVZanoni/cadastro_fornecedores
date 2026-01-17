@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
-import { Plus, Pencil, Trash2, Tag, Scale } from 'lucide-react'
+import { Plus, Trash2, Tag, Scale } from 'lucide-react'
 
 type Categoria = {
     id: number

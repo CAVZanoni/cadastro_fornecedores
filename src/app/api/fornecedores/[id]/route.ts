@@ -20,22 +20,22 @@ export async function PUT(
             }
         })
         return NextResponse.json(updated)
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao atualizar fornecedor' }, { status: 500 })
     }
 }
 
 export async function DELETE(
-    request: Request,
+    _req: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const { id } = await params
         await prisma.fornecedor.delete({
-            where: { id: Number(id) }
+            where: { id: parseInt(id) }
         })
-        return NextResponse.json({ success: true })
-    } catch (error) {
-        return NextResponse.json({ error: 'Erro ao deletar fornecedor. Verifique se há propostas vinculadas.' }, { status: 500 })
+        return NextResponse.json({ message: 'Fornecedor excluído com sucesso' })
+    } catch (_error) {
+        return NextResponse.json({ error: 'Erro ao excluir fornecedor' }, { status: 500 })
     }
 }

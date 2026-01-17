@@ -18,7 +18,7 @@ export async function PUT(
             }
         })
         return NextResponse.json(updated)
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao atualizar licitação' }, { status: 500 })
     }
 }
@@ -33,7 +33,7 @@ export async function DELETE(
             where: { id: Number(id) }
         })
         return NextResponse.json({ success: true })
-    } catch (error) {
+    } catch (_error) {
         return NextResponse.json({ error: 'Erro ao deletar licitação. Verifique se há propostas vinculadas.' }, { status: 500 })
     }
 }
