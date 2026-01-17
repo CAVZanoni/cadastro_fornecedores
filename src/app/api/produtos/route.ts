@@ -5,7 +5,13 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        const data = await prisma.produto.findMany({ orderBy: { createdAt: 'desc' } })
+        const data = await prisma.produto.findMany({
+            include: {
+                categoria: true,
+                unidade: true
+            },
+            orderBy: { createdAt: 'desc' }
+        })
         return NextResponse.json(data)
     } catch (error) {
         return NextResponse.json({ error: 'Erro ao buscar produtos' }, { status: 500 })
@@ -15,14 +21,25 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { nome, unidade } = body
-        if (!nome || !unidade) return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
+        const { nome, categoriaId, unidadeId, unidadeLegacy } = body
+
+        if (!nome) return NextResponse.json({ error: 'Nome é obrigatório' }, { status: 400 })
 
         const data = await prisma.produto.create({
-            data: { nome, unidade }
+            data: {
+                nome,
+                categoriaId: categoriaId ? Number(categoriaId) : undefined,
+                unidadeId: unidadeId ? Number(unidadeId) : undefined,
+                unidadeTexto: unidadeLegacy || undefined
+            },
+            include: {
+                categoria: true,
+                unidade: true
+            }
         })
         return NextResponse.json(data)
     } catch (error) {
+        console.error(error)
         return NextResponse.json({ error: 'Erro ao criar produto' }, { status: 500 })
     }
 }

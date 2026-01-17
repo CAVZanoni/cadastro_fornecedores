@@ -7,7 +7,12 @@ export async function GET() {
     try {
         const itens = await prisma.itemProposta.findMany({
             include: {
-                produto: true,
+                produto: {
+                    include: {
+                        categoria: true,
+                        unidade: true
+                    }
+                },
                 proposta: {
                     include: {
                         licitacao: {
@@ -32,7 +37,8 @@ export async function GET() {
             licitacao: item.proposta.licitacao.nome,
             fornecedor: item.proposta.fornecedor.nome,
             produto: item.produto.nome,
-            unidade: item.produto.unidade,
+            categoria: item.produto.categoria?.nome || '-',
+            unidade: item.produto.unidade?.sigla || item.produto.unidadeTexto || '-',
             quantidade: item.quantidade,
             precoUnitario: item.precoUnitario,
             precoTotal: item.precoTotal || 0,

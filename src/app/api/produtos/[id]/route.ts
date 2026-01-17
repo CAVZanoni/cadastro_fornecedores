@@ -13,7 +13,13 @@ export async function PUT(
             where: { id: Number(id) },
             data: {
                 nome: json.nome,
-                unidade: json.unidade
+                categoriaId: json.categoriaId ? Number(json.categoriaId) : undefined,
+                unidadeId: json.unidadeId ? Number(json.unidadeId) : undefined,
+                unidadeTexto: json.unidadeLegacy || undefined
+            },
+            include: {
+                categoria: true,
+                unidade: true
             }
         })
         return NextResponse.json(updated)

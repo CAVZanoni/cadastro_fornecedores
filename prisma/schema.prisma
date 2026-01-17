@@ -33,10 +33,36 @@ model Fornecedor {
   updatedAt DateTime @updatedAt
 }
 
+model CategoriaProduto {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
+  produtos  Produto[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnidadeMedida {
+  id        Int      @id @default(autoincrement())
+  sigla     String   @unique // ex: kg, un, m
+  nome      String?         // ex: Kilograma, Unidade
+  produtos  Produto[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Produto {
   id        Int      @id @default(autoincrement())
   nome      String
-  unidade   String
+  
+  categoriaId Int?
+  categoria   CategoriaProduto? @relation(fields: [categoriaId], references: [id])
+  
+  unidadeId   Int?
+  unidade     UnidadeMedida?    @relation(fields: [unidadeId], references: [id])
+  
+  // Campo legado para compatibilidade durante migração
+  unidadeTexto String? @map("unidade") 
+
   itens     ItemProposta[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -81,4 +107,13 @@ model Municipio {
   nomeCompleto String  // formato "Cidade/UF"
   licitacoes Licitacao[]
   createdAt  DateTime @default(now())
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

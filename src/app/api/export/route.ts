@@ -13,12 +13,21 @@ export async function GET() {
                 orderBy: { id: 'asc' }
             }),
             prisma.fornecedor.findMany({ orderBy: { id: 'asc' } }),
-            prisma.produto.findMany({ orderBy: { id: 'asc' } }),
+            prisma.produto.findMany({
+                include: { categoria: true, unidade: true },
+                orderBy: { id: 'asc' }
+            }),
             prisma.proposta.findMany({
                 include: {
                     licitacao: { include: { municipio: true } },
                     fornecedor: true,
-                    itens: { include: { produto: true } }
+                    itens: {
+                        include: {
+                            produto: {
+                                include: { categoria: true, unidade: true }
+                            }
+                        }
+                    }
                 },
                 orderBy: { id: 'asc' }
             })
@@ -38,7 +47,8 @@ export async function GET() {
                     'Nº Proposta': p.numero,
                     'Fornecedor': p.fornecedor?.nome || '',
                     'Produto': item.produto?.nome || '',
-                    'Unidade': item.produto?.unidade || '',
+                    'Categoria': item.produto?.categoria?.nome || '-',
+                    'Unidade': item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-',
                     'Quantidade': item.quantidade,
                     'Preço Unitário': item.precoUnitario,
                     'Preço Total': item.precoTotal || 0,
@@ -89,7 +99,8 @@ export async function GET() {
         const produtosData = produtos.map(p => ({
             ID: p.id,
             Nome: p.nome,
-            Unidade: p.unidade
+            Categoria: p.categoria?.nome || '-',
+            Unidade: p.unidade?.sigla || p.unidadeTexto || '-'
         }))
         const wsProdutos = XLSX.utils.json_to_sheet(produtosData)
         XLSX.utils.book_append_sheet(wb, wsProdutos, 'Produtos')
@@ -116,7 +127,8 @@ export async function GET() {
                     'Proposta': p.numero,
                     'Data': p.data ? p.data.toISOString().split('T')[0] : '',
                     'Produto': item.produto?.nome || '',
-                    'Unidade': item.produto?.unidade || '',
+                    'Categoria': item.produto?.categoria?.nome || '-',
+                    'Unidade': item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-',
                     'Quantidade': item.quantidade,
                     'Preço Unitário': item.precoUnitario,
                     'Preço Total': item.precoTotal || 0,

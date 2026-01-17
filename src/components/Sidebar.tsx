@@ -1,8 +1,9 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Gavel, Users, Package, FileText } from 'lucide-react'
+import { LayoutDashboard, Gavel, Users, Package, FileText, Settings, LogOut } from 'lucide-react'
 import { clsx } from 'clsx'
+import { signOut } from 'next-auth/react'
 
 const links = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -11,6 +12,7 @@ const links = [
     { name: 'Produtos', href: '/produtos', icon: Package },
     { name: 'Propostas', href: '/propostas', icon: FileText },
     { name: 'Relatórios', href: '/relatorios', icon: FileText },
+    { name: 'Configurações', href: '/configuracoes', icon: Settings },
 ]
 
 export function Sidebar() {
@@ -40,7 +42,16 @@ export function Sidebar() {
                     )
                 })}
             </nav>
-            <div className="text-xs text-slate-600 mt-auto text-center">
+
+            <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all hover:bg-red-500/10 text-slate-400 hover:text-red-400 mt-4 border-t border-slate-800/50 pt-6"
+            >
+                <LogOut size={20} />
+                <span className="font-medium">Sair do Sistema</span>
+            </button>
+
+            <div className="text-xs text-slate-600 mt-auto text-center pt-4">
                 &copy; 2026 Sistema v1.0
             </div>
         </div>

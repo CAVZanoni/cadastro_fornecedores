@@ -3,27 +3,51 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 
+type Categoria = { id: number; nome: string }
+type Unidade = { id: number; sigla: string; nome: string | null }
+
 type Produto = {
     id: number
     nome: string
-    unidade: string
+    categoriaId: number | null
+    categoria?: Categoria | null
+    unidadeId: number | null
+    unidade?: Unidade | null
+    unidadeTexto?: string | null // Legacy
     createdAt: string
 }
 
 export default function ProdutosPage() {
     const [data, setData] = useState<Produto[]>([])
+    const [categorias, setCategorias] = useState<Categoria[]>([])
+    const [unidades, setUnidades] = useState<Unidade[]>([])
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [editId, setEditId] = useState<number | null>(null)
 
     const [form, setForm] = useState({
         nome: '',
-        unidade: ''
+        categoriaId: '',
+        unidadeId: ''
     })
 
     useEffect(() => {
         fetchData()
+        fetchAuxiliaryData()
     }, [])
+
+    async function fetchAuxiliaryData() {
+        try {
+            const [catRes, uniRes] = await Promise.all([
+                fetch('/api/categorias'),
+                fetch('/api/unidades')
+            ])
+            if (catRes.ok) setCategorias(await catRes.json())
+            if (uniRes.ok) setUnidades(await uniRes.json())
+        } catch (error) {
+            console.error('Erro ao buscar dados auxiliares')
+        }
+    }
 
     async function fetchData() {
         try {
@@ -39,7 +63,7 @@ export default function ProdutosPage() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
-        if (!form.nome || !form.unidade) return
+        if (!form.nome) return
         setSubmitting(true)
         try {
             const url = editId ? `/api/produtos/${editId}` : '/api/produtos'
@@ -60,7 +84,7 @@ export default function ProdutosPage() {
     }
 
     function resetForm() {
-        setForm({ nome: '', unidade: '' })
+        setForm({ nome: '', categoriaId: '', unidadeId: '' })
         setEditId(null)
     }
 
@@ -68,7 +92,8 @@ export default function ProdutosPage() {
         setEditId(item.id)
         setForm({
             nome: item.nome,
-            unidade: item.unidade
+            categoriaId: item.categoriaId?.toString() || '',
+            unidadeId: item.unidadeId?.toString() || ''
         })
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -94,8 +119,21 @@ export default function ProdutosPage() {
                 <h1 className="text-3xl font-bold text-slate-800">Produtos</h1>
 
                 <Card>
-                    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 items-end">
-                        <div className="flex-[2] w-full">
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div className="md:col-span-1">
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
+                            <select
+                                value={form.categoriaId}
+                                onChange={e => setForm({ ...form, categoriaId: e.target.value })}
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 bg-white"
+                            >
+                                <option value="">Selecione...</option>
+                                {categorias.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="md:col-span-1">
                             <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Produto</label>
                             <input
                                 type="text"
@@ -106,19 +144,21 @@ export default function ProdutosPage() {
                                 required
                             />
                         </div>
-                        <div className="flex-1 w-full">
+                        <div className="md:col-span-1">
                             <label className="block text-sm font-medium text-slate-700 mb-1">Unidade</label>
-                            <input
-                                type="text"
-                                value={form.unidade}
-                                onChange={e => setForm({ ...form, unidade: e.target.value })}
-                                placeholder="Ex: SC, KG, UN"
-                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500"
-                                required
-                            />
+                            <select
+                                value={form.unidadeId}
+                                onChange={e => setForm({ ...form, unidadeId: e.target.value })}
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 bg-white"
+                            >
+                                <option value="">Selecione...</option>
+                                {unidades.map(uni => (
+                                    <option key={uni.id} value={uni.id}>{uni.sigla} - {uni.nome}</option>
+                                ))}
+                            </select>
                         </div>
 
-                        <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex gap-2">
                             {editId && (
                                 <button
                                     type="button"
@@ -130,7 +170,7 @@ export default function ProdutosPage() {
                             )}
                             <button
                                 disabled={submitting}
-                                className={`flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap h-[42px] px-6`}
+                                className={`flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap h-[42px] px-6 shadow-sm`}
                             >
                                 {editId ? <Pencil size={18} /> : <Plus size={18} />}
                                 {editId ? 'Salvar' : 'Cadastrar'}
@@ -140,10 +180,11 @@ export default function ProdutosPage() {
                 </Card>
 
                 <Card className="overflow-hidden p-0 shadow-sm border border-slate-200">
-                    <table className="w-full text-left">
+                    <table className="w-full text-left bg-white">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
                                 <th className="p-4 font-semibold text-slate-600 w-20">ID</th>
+                                <th className="p-4 font-semibold text-slate-600">Categoria</th>
                                 <th className="p-4 font-semibold text-slate-600">Nome</th>
                                 <th className="p-4 font-semibold text-slate-600">Unidade</th>
                                 <th className="p-4 font-semibold text-slate-600 text-right w-24">Ações</th>
@@ -151,18 +192,35 @@ export default function ProdutosPage() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {loading ? (
-                                <tr><td colSpan={4} className="p-8 text-center text-slate-500">Carregando...</td></tr>
+                                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Carregando...</td></tr>
                             ) : data.length === 0 ? (
-                                <tr><td colSpan={4} className="p-8 text-center text-slate-500">Nenhum produto cadastrado.</td></tr>
+                                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Nenhum produto cadastrado.</td></tr>
                             ) : (
                                 data.map((item) => (
                                     <tr key={item.id} className={`hover:bg-slate-50 transition-colors ${editId === item.id ? 'bg-blue-50' : ''}`}>
-                                        <td className="p-4 text-slate-500">#{item.id}</td>
+                                        <td className="p-4 text-slate-400 text-xs font-mono">#{item.id}</td>
+                                        <td className="p-4">
+                                            {item.categoria ? (
+                                                <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                                    {item.categoria.nome}
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-slate-400">-</span>
+                                            )}
+                                        </td>
                                         <td className="p-4 font-medium text-slate-900">{item.nome}</td>
                                         <td className="p-4 text-slate-600">
-                                            <span className="px-2 py-1 bg-slate-100 rounded text-xs font-semibold text-slate-700 border border-slate-200">
-                                                {item.unidade}
-                                            </span>
+                                            {item.unidade ? (
+                                                <span className="px-2 py-1 bg-slate-100 rounded text-xs font-semibold text-slate-700 border border-slate-200" title={item.unidade.nome || ''}>
+                                                    {item.unidade.sigla}
+                                                </span>
+                                            ) : item.unidadeTexto ? (
+                                                <span className="px-2 py-1 bg-amber-50 rounded text-xs font-semibold text-amber-700 border border-amber-100 italic" title="Legacy">
+                                                    {item.unidadeTexto}
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-slate-400">-</span>
+                                            )}
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex justify-end gap-2">
