@@ -20,7 +20,8 @@ export async function POST(request: Request) {
                 produtoId: Number(produtoId),
                 quantidade: qtd,
                 precoUnitario: price,
-                precoTotal: total
+                precoTotal: total,
+                observacoes: body.observacoes || undefined
             },
             include: { produto: true }
         })

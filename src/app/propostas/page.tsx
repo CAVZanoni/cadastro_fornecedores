@@ -19,6 +19,7 @@ type Proposta = {
     createdAt: string
     data: string // Manual date
     arquivoUrl?: string | null
+    observacoes?: string | null
 }
 
 type Option = { id: number, nome: string }
@@ -36,7 +37,8 @@ export default function PropostasPage() {
         numero: '',
         licitacaoId: '',
         fornecedorId: '',
-        data: ''
+        data: '',
+        observacoes: ''
     })
     const [file, setFile] = useState<File | null>(null)
 
@@ -91,15 +93,6 @@ export default function PropostasPage() {
 
             // Keep existing file if editing and no new file upload
             if (editId && !uploadedUrl) {
-                // We rely on the backend keeping the old value if we send undefined/null? 
-                // Actually my API logic replaces it if sent. 
-                // Let's check API logic: `arquivoUrl: body.arquivoUrl || undefined`.
-                // If I send undefined in JSON, it might skip update or set null?
-                // The PUT endpoint: `arquivoUrl: json.arquivoUrl || undefined`.
-                // If I want to KEEP existing, I should fetch it or not send the key?
-                // Safer: In edit mode, if I don't select a new file, I should probably pass the OLD url if I want to keep it.
-                // But I don't store the old URL in `form`. 
-                // Let's refine `handleEdit` to store old url or logic here.
                 const existing = propostas.find(p => p.id === editId)
                 if (existing?.arquivoUrl) {
                     payload.arquivoUrl = existing.arquivoUrl
@@ -128,7 +121,7 @@ export default function PropostasPage() {
     }
 
     function resetForm() {
-        setForm({ numero: '', licitacaoId: '', fornecedorId: '', data: '' })
+        setForm({ numero: '', licitacaoId: '', fornecedorId: '', data: '', observacoes: '' })
         setFile(null)
         setEditId(null)
     }
@@ -139,7 +132,8 @@ export default function PropostasPage() {
             numero: item.numero,
             licitacaoId: String(item.licitacaoId),
             fornecedorId: String(item.fornecedorId),
-            data: item.data ? new Date(item.data).toISOString().split('T')[0] : ''
+            data: item.data ? new Date(item.data).toISOString().split('T')[0] : '',
+            observacoes: item.observacoes || ''
         })
         setFile(null)
         window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -174,7 +168,7 @@ export default function PropostasPage() {
                                     value={form.numero}
                                     onChange={e => setForm({ ...form, numero: e.target.value })}
                                     placeholder="123/2026"
-                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500"
+                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                     required
                                 />
                             </div>
@@ -184,7 +178,7 @@ export default function PropostasPage() {
                                 <select
                                     value={form.licitacaoId}
                                     onChange={e => setForm({ ...form, licitacaoId: e.target.value })}
-                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 bg-white"
+                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 bg-white outline-none"
                                     required
                                 >
                                     <option value="">Selecione...</option>
@@ -199,7 +193,7 @@ export default function PropostasPage() {
                                 <select
                                     value={form.fornecedorId}
                                     onChange={e => setForm({ ...form, fornecedorId: e.target.value })}
-                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 bg-white"
+                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 bg-white outline-none"
                                     required
                                 >
                                     <option value="">Selecione...</option>
@@ -215,9 +209,19 @@ export default function PropostasPage() {
                                     type="date"
                                     value={form.data}
                                     onChange={e => setForm({ ...form, data: e.target.value })}
-                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 bg-white"
+                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 bg-white outline-none"
                                 />
                             </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Observações</label>
+                            <textarea
+                                value={form.observacoes}
+                                onChange={e => setForm({ ...form, observacoes: e.target.value })}
+                                placeholder="Observações adicionais..."
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
+                            />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -263,14 +267,15 @@ export default function PropostasPage() {
                                 <th className="p-4 font-semibold text-slate-600">Licitação</th>
                                 <th className="p-4 font-semibold text-slate-600">Fornecedor</th>
                                 <th className="p-4 font-semibold text-slate-600 w-32">Data</th>
+                                <th className="p-4 font-semibold text-slate-600">Obs.</th>
                                 <th className="p-4 font-semibold text-slate-600 text-right w-56">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {loading ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Carregando...</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">Carregando...</td></tr>
                             ) : propostas.length === 0 ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Nenhuma proposta cadastrada.</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nenhuma proposta cadastrada.</td></tr>
                             ) : (
                                 propostas.map((item) => (
                                     <tr key={item.id} className={`hover:bg-slate-50 transition-colors ${editId === item.id ? 'bg-blue-50' : ''}`}>
@@ -281,6 +286,9 @@ export default function PropostasPage() {
                                             {item.data
                                                 ? new Date(item.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
                                                 : new Date(item.createdAt).toLocaleDateString('pt-BR')}
+                                        </td>
+                                        <td className="p-4 text-slate-600 text-sm max-w-[200px] truncate" title={item.observacoes || ''}>
+                                            {item.observacoes}
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex justify-end items-center gap-3">

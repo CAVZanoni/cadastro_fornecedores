@@ -15,6 +15,8 @@ type ReportItem = {
     precoTotal: number
     numeroProposta: string
     arquivoUrl?: string
+    obsProp?: string
+    obsItem?: string
 }
 
 export default function RelatoriosPage() {
@@ -70,7 +72,9 @@ export default function RelatoriosPage() {
             item.produto.toLowerCase().includes(term) ||
             item.numeroProposta.toLowerCase().includes(term) ||
             item.licitacao.toLowerCase().includes(term) ||
-            item.fornecedor.toLowerCase().includes(term)
+            item.fornecedor.toLowerCase().includes(term) ||
+            (item.obsProp?.toLowerCase().includes(term)) ||
+            (item.obsItem?.toLowerCase().includes(term))
         )
 
         const itemDate = new Date(item.data).toISOString().split('T')[0]
@@ -239,14 +243,15 @@ export default function RelatoriosPage() {
                                 <ThSort column="quantidade" label="Qtd" align="right" width="w-16" />
                                 <ThSort column="precoUnitario" label="Unitário" align="right" width="w-20" />
                                 <ThSort column="precoTotal" label="Total" align="right" width="w-24" />
+                                <th className="p-2 w-32 font-semibold bg-slate-100">Obs.</th>
                                 <th className="p-2 w-12 text-center bg-slate-100">Anexo</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {loading ? (
-                                <tr><td colSpan={11} className="p-8 text-center text-slate-500">Carregando relatório...</td></tr>
+                                <tr><td colSpan={12} className="p-8 text-center text-slate-500">Carregando relatório...</td></tr>
                             ) : sortedItems.length === 0 ? (
-                                <tr><td colSpan={11} className="p-8 text-center text-slate-500">Nenhum dado encontrado.</td></tr>
+                                <tr><td colSpan={12} className="p-8 text-center text-slate-500">Nenhum dado encontrado.</td></tr>
                             ) : (
                                 sortedItems.map((item) => (
                                     <tr key={item.id} className="hover:bg-blue-50 transition-colors group">
@@ -262,6 +267,10 @@ export default function RelatoriosPage() {
                                         <td className="p-2 text-slate-600 text-right font-mono">{item.quantidade}</td>
                                         <td className="p-2 text-slate-600 text-right font-mono">{formatCurrency(item.precoUnitario)}</td>
                                         <td className="p-2 text-slate-900 text-right font-mono font-bold">{formatCurrency(item.precoTotal)}</td>
+                                        <td className="p-2 text-slate-500 text-[10px] italic space-y-0.5 max-w-[150px] overflow-hidden">
+                                            {item.obsProp && <div className="truncate" title={`Proposta: ${item.obsProp}`}>P: {item.obsProp}</div>}
+                                            {item.obsItem && <div className="truncate" title={`Item: ${item.obsItem}`}>I: {item.obsItem}</div>}
+                                        </td>
                                         <td className="p-2 text-center">
                                             {item.arquivoUrl ? (
                                                 <a href={item.arquivoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors inline-block" title="Ver Anexo">

@@ -16,7 +16,8 @@ export async function PUT(
                 licitacaoId: Number(json.licitacaoId),
                 fornecedorId: Number(json.fornecedorId),
                 data: json.data ? new Date(json.data) : undefined,
-                arquivoUrl: json.arquivoUrl || undefined
+                arquivoUrl: json.arquivoUrl || undefined,
+                observacoes: json.observacoes || undefined
             }
         })
         return NextResponse.json(updated)

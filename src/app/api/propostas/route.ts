@@ -30,7 +30,8 @@ export async function POST(request: Request) {
                 licitacaoId: Number(licitacaoId),
                 fornecedorId: Number(fornecedorId),
                 data: body.data ? new Date(body.data) : undefined,
-                arquivoUrl: body.arquivoUrl || undefined
+                arquivoUrl: body.arquivoUrl || undefined,
+                observacoes: body.observacoes || undefined
             }
         })
         return NextResponse.json(data)

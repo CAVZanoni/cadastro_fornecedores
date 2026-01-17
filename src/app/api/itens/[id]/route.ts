@@ -14,7 +14,8 @@ export async function PUT(
             data: {
                 produtoId: Number(json.produtoId),
                 quantidade: Number(json.quantidade),
-                precoUnitario: Number(json.precoUnitario)
+                precoUnitario: Number(json.precoUnitario),
+                observacoes: json.observacoes || undefined
             }
         })
         return NextResponse.json(updated)

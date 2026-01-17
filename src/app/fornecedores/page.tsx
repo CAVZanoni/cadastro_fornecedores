@@ -32,6 +32,25 @@ export default function FornecedoresPage() {
         fetchData()
     }, [])
 
+    // Mask Helpers
+    const maskCNPJ = (value: string) => {
+        return value
+            .replace(/\D/g, '')
+            .replace(/^(\d{2})(\d)/, '$1.$2')
+            .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+            .replace(/\.(\d{3})(\d)/, '.$1/$2')
+            .replace(/(\d{4})(\d)/, '$1-$2')
+            .replace(/(-\d{2})\d+?$/, '$1')
+    }
+
+    const maskPhone = (value: string) => {
+        return value
+            .replace(/\D/g, '')
+            .replace(/^(\d{2})(\d)/, '($1) $2')
+            .replace(/(\d{5})(\d)/, '$1-$2')
+            .replace(/(-\d{4})\d+?$/, '$1')
+    }
+
     async function fetchData() {
         try {
             const res = await fetch('/api/fornecedores')
@@ -111,7 +130,7 @@ export default function FornecedoresPage() {
                                 type="text"
                                 value={form.nome}
                                 onChange={e => setForm({ ...form, nome: e.target.value })}
-                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500"
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                 required
                             />
                         </div>
@@ -121,34 +140,37 @@ export default function FornecedoresPage() {
                                 type="text"
                                 value={form.contato}
                                 onChange={e => setForm({ ...form, contato: e.target.value })}
-                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500"
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">WhatsApp</label>
                             <input
                                 type="text"
+                                placeholder="(00) 00000-0000"
                                 value={form.whatsapp}
-                                onChange={e => setForm({ ...form, whatsapp: e.target.value })}
-                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500"
+                                onChange={e => setForm({ ...form, whatsapp: maskPhone(e.target.value) })}
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
                             <input
                                 type="email"
+                                placeholder="exemplo@email.com"
                                 value={form.email}
-                                onChange={e => setForm({ ...form, email: e.target.value })}
-                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500"
+                                onChange={e => setForm({ ...form, email: e.target.value.toLowerCase().trim() })}
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">CNPJ</label>
                             <input
                                 type="text"
+                                placeholder="00.000.000/0000-00"
                                 value={form.cnpj}
-                                onChange={e => setForm({ ...form, cnpj: e.target.value })}
-                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500"
+                                onChange={e => setForm({ ...form, cnpj: maskCNPJ(e.target.value) })}
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
 
@@ -164,7 +186,7 @@ export default function FornecedoresPage() {
                             )}
                             <button
                                 disabled={submitting}
-                                className={`flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 h-10`}
+                                className={`flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 h-10 shadow-sm`}
                             >
                                 {editId ? <Pencil size={18} /> : <Plus size={18} />}
                                 {editId ? 'Salvar' : 'Cadastrar'}
@@ -198,8 +220,8 @@ export default function FornecedoresPage() {
                                                 {item.email && <div className="text-xs text-slate-400 font-normal">{item.email}</div>}
                                             </td>
                                             <td className="p-4 text-slate-600">{item.contato || '-'}</td>
-                                            <td className="p-4 text-slate-600">{item.whatsapp || '-'}</td>
-                                            <td className="p-4 text-slate-600">{item.cnpj || '-'}</td>
+                                            <td className="p-4 text-slate-600">{item.whatsapp ? maskPhone(item.whatsapp) : '-'}</td>
+                                            <td className="p-4 text-slate-600">{item.cnpj ? maskCNPJ(item.cnpj) : '-'}</td>
                                             <td className="p-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <button

@@ -11,16 +11,17 @@ type ItemProposta = {
     quantidade: number
     precoUnitario: number
     precoTotal: number
+    observacoes?: string | null
 }
 
 type PropostaDetalhe = {
     id: number
     numero: string
     licitacao: { nome: string }
-
     fornecedor: { nome: string }
     itens: ItemProposta[]
     arquivoUrl?: string | null
+    observacoes?: string | null
 }
 
 type ProdutoOption = { id: number, nome: string, unidade: string }
@@ -39,7 +40,8 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
     const [form, setForm] = useState({
         produtoId: '',
         quantidade: '',
-        precoUnitario: ''
+        precoUnitario: '',
+        observacoes: ''
     })
 
     useEffect(() => {
@@ -75,7 +77,8 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                     propostaId: id,
                     produtoId: form.produtoId,
                     quantidade: form.quantidade,
-                    precoUnitario: form.precoUnitario
+                    precoUnitario: form.precoUnitario,
+                    observacoes: form.observacoes
                 })
             })
             if (res.ok) {
@@ -88,7 +91,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
     }
 
     function resetForm() {
-        setForm({ produtoId: '', quantidade: '', precoUnitario: '' })
+        setForm({ produtoId: '', quantidade: '', precoUnitario: '', observacoes: '' })
         setEditId(null)
     }
 
@@ -97,7 +100,8 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
         setForm({
             produtoId: String(item.produtoId),
             quantidade: String(item.quantidade),
-            precoUnitario: String(item.precoUnitario)
+            precoUnitario: String(item.precoUnitario),
+            observacoes: item.observacoes || ''
         })
     }
 
@@ -175,6 +179,11 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                             <p className="text-slate-500 text-sm">
                                 {proposta.licitacao?.nome} • {proposta.fornecedor?.nome}
                             </p>
+                            {proposta.observacoes && (
+                                <p className="text-slate-600 text-sm mt-1 bg-blue-50 p-2 rounded border border-blue-100 italic">
+                                    <strong>Obs:</strong> {proposta.observacoes}
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -200,60 +209,72 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                     <h3 className="font-semibold text-slate-700 mb-4 border-b pb-2">
                         {editId ? 'Editar Item' : 'Adicionar Item'}
                     </h3>
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                        <div className="md:col-span-5">
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Produto</label>
-                            <select
-                                value={form.produtoId}
-                                onChange={e => setForm({ ...form, produtoId: e.target.value })}
-                                className="w-full rounded-md border border-slate-300 p-2 text-sm bg-white"
-                                required
-                            >
-                                <option value="">Selecione...</option>
-                                {produtos.map(p => (
-                                    <option key={p.id} value={p.id}>{p.nome} ({p.unidade})</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Qtd.</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                value={form.quantidade}
-                                onChange={e => setForm({ ...form, quantidade: e.target.value })}
-                                className="w-full rounded-md border border-slate-300 p-2 text-sm"
-                                required
-                            />
-                        </div>
-                        <div className="md:col-span-3">
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Preço Unit. (R$)</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                value={form.precoUnitario}
-                                onChange={e => setForm({ ...form, precoUnitario: e.target.value })}
-                                className="w-full rounded-md border border-slate-300 p-2 text-sm"
-                                required
-                            />
-                        </div>
-                        <div className="md:col-span-2 flex gap-2">
-                            {editId && (
-                                <button
-                                    type="button"
-                                    onClick={resetForm}
-                                    className="flex-1 border border-slate-300 text-slate-700 px-3 py-2 rounded-md hover:bg-slate-50 text-sm h-[38px]"
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                            <div className="md:col-span-5">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Produto</label>
+                                <select
+                                    value={form.produtoId}
+                                    onChange={e => setForm({ ...form, produtoId: e.target.value })}
+                                    className="w-full rounded-md border border-slate-300 p-2 text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
                                 >
-                                    <Plus size={16} className="rotate-45" />
+                                    <option value="">Selecione...</option>
+                                    {produtos.map(p => (
+                                        <option key={p.id} value={p.id}>{p.nome} ({p.unidade})</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Qtd.</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={form.quantidade}
+                                    onChange={e => setForm({ ...form, quantidade: e.target.value })}
+                                    className="w-full rounded-md border border-slate-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                            <div className="md:col-span-3">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Preço Unit. (R$)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    value={form.precoUnitario}
+                                    onChange={e => setForm({ ...form, precoUnitario: e.target.value })}
+                                    className="w-full rounded-md border border-slate-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                            <div className="md:col-span-2 flex gap-2">
+                                {editId && (
+                                    <button
+                                        type="button"
+                                        onClick={resetForm}
+                                        className="flex-1 border border-slate-300 text-slate-700 px-3 py-2 rounded-md hover:bg-slate-50 text-sm h-[38px]"
+                                    >
+                                        <Plus size={16} className="rotate-45" />
+                                    </button>
+                                )}
+                                <button
+                                    disabled={submitting}
+                                    className={`flex-[2] bg-slate-900 text-white px-3 py-2 rounded-md hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center gap-2 text-sm h-[38px]`}
+                                >
+                                    {editId ? <Pencil size={16} /> : <Plus size={16} />}
+                                    {editId ? 'Salvar' : 'Adicionar'}
                                 </button>
-                            )}
-                            <button
-                                disabled={submitting}
-                                className={`flex-[2] bg-slate-900 text-white px-3 py-2 rounded-md hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center gap-2 text-sm h-[38px]`}
-                            >
-                                {editId ? <Pencil size={16} /> : <Plus size={16} />}
-                                {editId ? 'Salvar' : 'Adicionar'}
-                            </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Observações do Item</label>
+                            <input
+                                type="text"
+                                value={form.observacoes}
+                                onChange={e => setForm({ ...form, observacoes: e.target.value })}
+                                placeholder="Observações específicas para este item..."
+                                className="w-full rounded-md border border-slate-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                            />
                         </div>
                     </form>
                 </Card>
@@ -266,12 +287,13 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                                 <th className="p-4 font-semibold text-slate-600 text-right">Qtd</th>
                                 <th className="p-4 font-semibold text-slate-600 text-right">Unitário</th>
                                 <th className="p-4 font-semibold text-slate-600 text-right">Total</th>
+                                <th className="p-4 font-semibold text-slate-600">Observações</th>
                                 <th className="p-4 font-semibold text-slate-600 w-24"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-sm">
                             {proposta.itens?.length === 0 && (
-                                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Nenhum item adicionado.</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nenhum item adicionado.</td></tr>
                             )}
                             {proposta.itens?.map((item) => (
                                 <tr key={item.id} className={`hover:bg-slate-50 ${editId === item.id ? 'bg-blue-50' : ''}`}>
@@ -286,6 +308,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                                     <td className="p-4 text-right font-medium text-slate-900">
                                         {(item.precoTotal || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </td>
+                                    <td className="p-4 text-slate-600 text-xs italic">{item.observacoes}</td>
                                     <td className="p-4 text-right">
                                         <div className="flex justify-end gap-2">
                                             <button

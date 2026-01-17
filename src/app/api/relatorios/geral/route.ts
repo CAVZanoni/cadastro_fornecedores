@@ -37,7 +37,9 @@ export async function GET() {
             precoUnitario: item.precoUnitario,
             precoTotal: item.precoTotal || 0,
             numeroProposta: item.proposta.numero,
-            arquivoUrl: item.proposta.arquivoUrl
+            arquivoUrl: item.proposta.arquivoUrl,
+            obsProp: item.proposta.observacoes,
+            obsItem: item.observacoes
         }))
 
         return NextResponse.json(flatData)
