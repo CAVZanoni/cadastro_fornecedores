@@ -112,7 +112,7 @@ export default function FornecedoresPage() {
                 const err = await res.json()
                 alert(err.error || 'Erro ao excluir')
             }
-        } catch (_error) {
+        } catch {
             alert('Erro ao excluir')
         }
     }

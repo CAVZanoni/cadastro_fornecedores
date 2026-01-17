@@ -89,7 +89,6 @@ export default function RelatoriosPage() {
     // Unique values for dropdowns
     const municipios = Array.from(new Set(items.map(i => i.municipio))).sort()
     const fornecedores = Array.from(new Set(items.map(i => i.fornecedor))).sort()
-    const licitacoes = Array.from(new Set(items.map(i => i.licitacao))).sort()
 
     // Filter Logic
     const filteredItems = items.filter(item => {

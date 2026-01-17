@@ -20,7 +20,7 @@ export async function PUT(
             }
         })
         return NextResponse.json(updated)
-    } catch (_error) {
+    } catch {
         return NextResponse.json({ error: 'Erro ao atualizar fornecedor' }, { status: 500 })
     }
 }
@@ -35,7 +35,7 @@ export async function DELETE(
             where: { id: parseInt(id) }
         })
         return NextResponse.json({ message: 'Fornecedor excluído com sucesso' })
-    } catch (_error) {
+    } catch {
         return NextResponse.json({ error: 'Erro ao excluir fornecedor' }, { status: 500 })
     }
 }

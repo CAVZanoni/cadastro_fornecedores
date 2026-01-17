@@ -54,7 +54,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
 
             const prodRes = await fetch('/api/produtos')
             setProdutos(await prodRes.json())
-        } catch (_error) {
+        } catch {
             console.error('Error fetching data')
         } finally {
             setLoading(false)
@@ -113,7 +113,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
         try {
             await fetch(`/api/itens/${itemId}`, { method: 'DELETE' })
             fetchData()
-        } catch (_error) { console.error('Error deleting item') }
+        } catch { console.error('Error deleting item') }
     }
 
     async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {

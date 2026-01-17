@@ -44,7 +44,7 @@ export default function ProdutosPage() {
             ])
             if (catRes.ok) setCategorias(await catRes.json())
             if (uniRes.ok) setUnidades(await uniRes.json())
-        } catch (_error) {
+        } catch {
             console.error('Erro ao buscar dados auxiliares')
         }
     }
@@ -108,7 +108,7 @@ export default function ProdutosPage() {
                 const err = await res.json()
                 alert(err.error || 'Erro ao excluir')
             }
-        } catch (_error) {
+        } catch {
             alert('Erro ao excluir')
         }
     }

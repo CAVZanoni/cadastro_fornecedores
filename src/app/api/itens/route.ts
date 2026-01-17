@@ -26,8 +26,7 @@ export async function POST(request: Request) {
             include: { produto: true }
         })
         return NextResponse.json(data)
-    } catch (_error) {
-        console.error(error)
+    } catch {
         return NextResponse.json({ error: 'Erro ao adicionar item' }, { status: 500 })
     }
 }

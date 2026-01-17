@@ -9,7 +9,7 @@ export async function GET() {
             orderBy: { nome: 'asc' }
         })
         return NextResponse.json(data)
-    } catch (_error) {
+    } catch {
         return NextResponse.json({ error: 'Erro ao buscar categorias' }, { status: 500 })
     }
 }

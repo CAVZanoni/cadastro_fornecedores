@@ -9,7 +9,7 @@ export async function GET() {
             orderBy: { sigla: 'asc' }
         })
         return NextResponse.json(data)
-    } catch (_error) {
+    } catch {
         return NextResponse.json({ error: 'Erro ao buscar unidades' }, { status: 500 })
     }
 }
@@ -27,8 +27,7 @@ export async function POST(request: Request) {
             data: { sigla, nome }
         })
         return NextResponse.json(data)
-    } catch (_error) {
-        console.error(_error)
+    } catch {
         return NextResponse.json({ error: 'Erro ao criar unidade de medida' }, { status: 500 })
     }
 }
