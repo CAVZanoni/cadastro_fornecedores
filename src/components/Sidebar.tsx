@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Gavel, Users, Package, FileText, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, Gavel, Users, Package, FileText, Settings, LogOut, Shield } from 'lucide-react'
 import { clsx } from 'clsx'
 import { signOut } from 'next-auth/react'
 
@@ -13,6 +13,7 @@ const links = [
     { name: 'Propostas', href: '/propostas', icon: FileText },
     { name: 'Relatórios', href: '/relatorios', icon: FileText },
     { name: 'Configurações', href: '/configuracoes', icon: Settings },
+    { name: 'Usuários', href: '/usuarios', icon: Shield },
 ]
 
 export function Sidebar() {
