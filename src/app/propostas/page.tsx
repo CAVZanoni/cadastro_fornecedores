@@ -6,7 +6,6 @@ import Link from 'next/link'
 
 type Proposta = {
     id: number
-    numero: string
     licitacaoId: number
     fornecedorId: number
     licitacao: { nome: string }
@@ -29,7 +28,6 @@ export default function PropostasPage() {
     const [editId, setEditId] = useState<number | null>(null)
 
     const [form, setForm] = useState({
-        numero: '',
         licitacaoId: '',
         fornecedorId: '',
         data: '',
@@ -56,7 +54,7 @@ export default function PropostasPage() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
-        if (!form.numero || !form.licitacaoId || !form.fornecedorId) return
+        if (!form.licitacaoId || !form.fornecedorId) return
         setSubmitting(true)
 
         try {
@@ -115,7 +113,7 @@ export default function PropostasPage() {
     }
 
     function resetForm() {
-        setForm({ numero: '', licitacaoId: '', fornecedorId: '', data: '', observacoes: '' })
+        setForm({ licitacaoId: '', fornecedorId: '', data: '', observacoes: '' })
         setFile(null)
         setEditId(null)
     }
@@ -123,7 +121,6 @@ export default function PropostasPage() {
     function handleEdit(item: Proposta) {
         setEditId(item.id)
         setForm({
-            numero: item.numero,
             licitacaoId: String(item.licitacaoId),
             fornecedorId: String(item.fornecedorId),
             data: item.data ? new Date(item.data).toISOString().split('T')[0] : '',
@@ -154,20 +151,7 @@ export default function PropostasPage() {
 
                 <Card>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Nº Proposta</label>
-                                <input
-                                    type="text"
-                                    value={form.numero}
-                                    onChange={e => setForm({ ...form, numero: e.target.value.toUpperCase() })}
-                                    style={{ textTransform: 'uppercase' }}
-                                    placeholder="123/2026"
-                                    className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    required
-                                />
-                            </div>
-
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Licitação</label>
                                 <select

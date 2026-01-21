@@ -20,7 +20,6 @@ type ItemProposta = {
 
 type PropostaDetalhe = {
     id: number
-    numero: string
     licitacaoId: number
     licitacao: { nome: string }
     fornecedor: { nome: string }

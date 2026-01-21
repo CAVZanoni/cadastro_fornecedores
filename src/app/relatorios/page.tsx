@@ -14,7 +14,6 @@ type ReportItem = {
     quantidade: number
     precoUnitario: number
     precoTotal: number
-    numeroProposta: string
     arquivoUrl?: string
     obsProp?: string
     obsItem?: string
@@ -94,7 +93,6 @@ export default function RelatoriosPage() {
     const filteredItems = items.filter(item => {
         const matchesSearch = search.toLowerCase().split(' ').every(term =>
             item.produto.toLowerCase().includes(term) ||
-            item.numeroProposta.toLowerCase().includes(term) ||
             item.licitacao.toLowerCase().includes(term) ||
             item.fornecedor.toLowerCase().includes(term) ||
             (item.obsProp?.toLowerCase().includes(term)) ||
@@ -242,9 +240,8 @@ export default function RelatoriosPage() {
                             <tr>
                                 <ThSort column="data" label="Data" width="w-20" sortConfig={sortConfig} onSort={handleSort} />
                                 <ThSort column="municipio" label="Município" width="w-24" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="licitacao" label="Licitação" width="w-32" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="numeroProposta" label="Nº Proposta" width="w-24" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="fornecedor" label="Fornecedor" width="w-32" sortConfig={sortConfig} onSort={handleSort} />
+                                <ThSort column="licitacao" label="Licitação" width="w-40" sortConfig={sortConfig} onSort={handleSort} />
+                                <ThSort column="fornecedor" label="Fornecedor" width="w-40" sortConfig={sortConfig} onSort={handleSort} />
                                 <ThSort column="produto" label="Produto" width="w-40" sortConfig={sortConfig} onSort={handleSort} />
                                 <ThSort column="categoria" label="Categoria" width="w-24" sortConfig={sortConfig} onSort={handleSort} />
                                 <ThSort column="unidade" label="Unid." width="w-12" sortConfig={sortConfig} onSort={handleSort} />
@@ -257,9 +254,9 @@ export default function RelatoriosPage() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {loading ? (
-                                <tr><td colSpan={13} className="p-8 text-center text-slate-500">Carregando relatório...</td></tr>
+                                <tr><td colSpan={12} className="p-8 text-center text-slate-500">Carregando relatório...</td></tr>
                             ) : sortedItems.length === 0 ? (
-                                <tr><td colSpan={13} className="p-8 text-center text-slate-500">Nenhum dado encontrado.</td></tr>
+                                <tr><td colSpan={12} className="p-8 text-center text-slate-500">Nenhum dado encontrado.</td></tr>
                             ) : (
                                 sortedItems.map((item) => (
                                     <tr key={item.id} className="hover:bg-blue-50 transition-colors group">
@@ -268,7 +265,6 @@ export default function RelatoriosPage() {
                                         </td>
                                         <td className="p-2 text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis" title={item.municipio}>{item.municipio}</td>
                                         <td className="p-2 text-slate-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis" title={item.licitacao}>{item.licitacao}</td>
-                                        <td className="p-2 text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis">{item.numeroProposta}</td>
                                         <td className="p-2 text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis" title={item.fornecedor}>{item.fornecedor}</td>
                                         <td className="p-2 text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis" title={item.produto}>{item.produto}</td>
                                         <td className="p-2 text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis" title={item.categoria}>{item.categoria}</td>

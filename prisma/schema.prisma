@@ -71,7 +71,6 @@ model Produto {
 
 model Proposta {
   id           Int      @id @default(autoincrement())
-  numero       String
   licitacaoId  Int
   licitacao    Licitacao @relation(fields: [licitacaoId], references: [id])
   fornecedorId Int

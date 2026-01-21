@@ -28,15 +28,14 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { numero, licitacaoId, fornecedorId } = body
+        const { licitacaoId, fornecedorId } = body
 
-        if (!numero || !licitacaoId || !fornecedorId) {
+        if (!licitacaoId || !fornecedorId) {
             return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
         }
 
         const data = await prisma.proposta.create({
             data: {
-                numero,
                 licitacaoId: Number(licitacaoId),
                 fornecedorId: Number(fornecedorId),
                 data: body.data ? new Date(body.data) : undefined,

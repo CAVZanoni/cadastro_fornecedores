@@ -12,7 +12,6 @@ export async function PUT(
         const updated = await prisma.proposta.update({
             where: { id: Number(id) },
             data: {
-                numero: json.numero,
                 licitacaoId: Number(json.licitacaoId),
                 fornecedorId: Number(json.fornecedorId),
                 data: json.data ? new Date(json.data) : undefined,
