@@ -101,7 +101,8 @@ export default function ConfiguracoesPage() {
                                     type="text"
                                     placeholder="Nova categoria (ex: Informática)"
                                     value={catForm.nome}
-                                    onChange={e => setCatForm({ nome: e.target.value })}
+                                    onChange={e => setCatForm({ nome: e.target.value.toUpperCase() })}
+                                    style={{ textTransform: 'uppercase' }}
                                     className="flex-1 rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                     required
                                 />
@@ -152,7 +153,8 @@ export default function ConfiguracoesPage() {
                                     type="text"
                                     placeholder="Sigla (ex: kg)"
                                     value={uniForm.sigla}
-                                    onChange={e => setUniForm({ ...uniForm, sigla: e.target.value })}
+                                    onChange={e => setUniForm({ ...uniForm, sigla: e.target.value.toUpperCase() })}
+                                    style={{ textTransform: 'uppercase' }}
                                     className="rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                     required
                                 />
@@ -160,7 +162,8 @@ export default function ConfiguracoesPage() {
                                     type="text"
                                     placeholder="Nome (ex: Kilograma)"
                                     value={uniForm.nome}
-                                    onChange={e => setUniForm({ ...uniForm, nome: e.target.value })}
+                                    onChange={e => setUniForm({ ...uniForm, nome: e.target.value.toUpperCase() })}
+                                    style={{ textTransform: 'uppercase' }}
                                     className="rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                 />
                                 <button className="sm:col-span-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center gap-2">

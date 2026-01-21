@@ -43,7 +43,6 @@ export async function GET() {
                     'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
                     'Município': p.licitacao?.municipio?.nomeCompleto || '-',
                     'Licitação': p.licitacao?.nome || '',
-                    'Nº Proposta': p.numero,
                     'Fornecedor': p.fornecedor?.nome || '',
                     'Produto': item.produto?.nome || '',
                     'Categoria': item.produto?.categoria?.nome || '-',
@@ -51,6 +50,7 @@ export async function GET() {
                     'Quantidade': item.quantidade,
                     'Preço Unitário': item.precoUnitario,
                     'Preço Total': item.precoTotal || 0,
+                    'Obs Fornecedor': p.fornecedor?.observacoes || '',
                     'Obs Proposta': p.observacoes || '',
                     'Obs Item': item.observacoes || ''
                 })
@@ -89,7 +89,8 @@ export async function GET() {
             Contato: f.contato || '',
             WhatsApp: maskPhone(f.whatsapp),
             Email: f.email || '',
-            CNPJ: maskCNPJ(f.cnpj)
+            CNPJ: maskCNPJ(f.cnpj),
+            'Observações': f.observacoes || ''
         }))
         const wsFornecedores = XLSX.utils.json_to_sheet(fornecedoresData)
         XLSX.utils.book_append_sheet(wb, wsFornecedores, 'Fornecedores')
@@ -107,12 +108,12 @@ export async function GET() {
         // Sheet 5: Propostas
         const propostasData = propostas.map((p: any) => ({
             ID: p.id,
-            Número: p.numero,
             'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
             Licitação: p.licitacao?.nome || '',
             Fornecedor: p.fornecedor?.nome || '',
             'Total Itens': p.itens?.length || 0,
             'Valor Total': p.itens?.reduce((acc: number, item: any) => acc + (item.precoTotal || 0), 0) || 0,
+            'Obs Fornecedor': p.fornecedor?.observacoes || '',
             'Obs': p.observacoes || ''
         }))
         const wsPropostas = XLSX.utils.json_to_sheet(propostasData)
@@ -123,14 +124,16 @@ export async function GET() {
         propostas.forEach((p: any) => {
             p.itens?.forEach((item: any) => {
                 itensData.push({
-                    'Proposta': p.numero,
                     'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
+                    'Licitação': p.licitacao?.nome || '',
+                    'Fornecedor': p.fornecedor?.nome || '',
                     'Produto': item.produto?.nome || '',
                     'Categoria': item.produto?.categoria?.nome || '-',
                     'Unidade': item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-',
                     'Quantidade': item.quantidade,
                     'Preço Unitário': item.precoUnitario,
                     'Preço Total': item.precoTotal || 0,
+                    'Obs Fornecedor': p.fornecedor?.observacoes || '',
                     'Obs Proposta': p.observacoes || '',
                     'Obs Item': item.observacoes || ''
                 })

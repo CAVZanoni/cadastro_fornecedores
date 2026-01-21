@@ -6,7 +6,9 @@ import { getServerSession } from 'next-auth'
 export async function GET() {
     try {
         const session = await getServerSession()
-        if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+        if (!session || session.user?.email !== 'admin@sistema.com') {
+            return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
+        }
 
         const users = await prisma.user.findMany({
             select: {
@@ -26,7 +28,9 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const session = await getServerSession()
-        if (!session) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+        if (!session || session.user?.email !== 'admin@sistema.com') {
+            return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
+        }
 
         const body = await request.json()
         const { name, email, password } = body

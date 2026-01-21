@@ -157,7 +157,8 @@ export default function LicitacoesPage() {
                                 <input
                                     type="text"
                                     value={nome}
-                                    onChange={e => setNome(e.target.value)}
+                                    onChange={e => setNome(e.target.value.toUpperCase())}
+                                    style={{ textTransform: 'uppercase' }}
                                     placeholder="Ex: Pregão Eletrônico 01/2026"
                                     className="w-full rounded-md border border-slate-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required
@@ -186,9 +187,10 @@ export default function LicitacoesPage() {
                                             type="text"
                                             value={municipioSearch}
                                             onChange={e => {
-                                                setMunicipioSearch(e.target.value)
+                                                setMunicipioSearch(e.target.value.toUpperCase())
                                                 if (selectedMunicipio) setSelectedMunicipio(null)
                                             }}
+                                            style={{ textTransform: 'uppercase' }}
                                             placeholder="Digite 3 letras..."
                                             className="w-full rounded-md border border-slate-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         />

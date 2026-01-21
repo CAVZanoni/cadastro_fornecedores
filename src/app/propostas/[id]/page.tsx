@@ -184,7 +184,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                             <ArrowLeft size={20} className="text-slate-600" />
                         </Link>
                         <div>
-                            <h1 className="text-2xl font-bold text-slate-800">Proposta #{proposta.numero}</h1>
+                            <h1 className="text-2xl font-bold text-slate-800">Detalhes da Proposta</h1>
                             <p className="text-slate-500 text-sm">
                                 {proposta.licitacao?.nome} • {proposta.fornecedor?.nome}
                             </p>
@@ -280,7 +280,8 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                             <input
                                 type="text"
                                 value={form.observacoes}
-                                onChange={e => setForm({ ...form, observacoes: e.target.value })}
+                                onChange={e => setForm({ ...form, observacoes: e.target.value.toUpperCase() })}
+                                style={{ textTransform: 'uppercase' }}
                                 placeholder="Observações específicas para este item..."
                                 className="w-full rounded-md border border-slate-300 p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                             />

@@ -160,7 +160,8 @@ export default function PropostasPage() {
                                 <input
                                     type="text"
                                     value={form.numero}
-                                    onChange={e => setForm({ ...form, numero: e.target.value })}
+                                    onChange={e => setForm({ ...form, numero: e.target.value.toUpperCase() })}
+                                    style={{ textTransform: 'uppercase' }}
                                     placeholder="123/2026"
                                     className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                     required
@@ -212,7 +213,8 @@ export default function PropostasPage() {
                             <label className="block text-sm font-medium text-slate-700 mb-1">Observações</label>
                             <textarea
                                 value={form.observacoes}
-                                onChange={e => setForm({ ...form, observacoes: e.target.value })}
+                                onChange={e => setForm({ ...form, observacoes: e.target.value.toUpperCase() })}
+                                style={{ textTransform: 'uppercase' }}
                                 placeholder="Observações adicionais..."
                                 className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
                             />
@@ -257,7 +259,6 @@ export default function PropostasPage() {
                     <table className="w-full text-left">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="p-4 font-semibold text-slate-600 w-24">Número</th>
                                 <th className="p-4 font-semibold text-slate-600">Licitação</th>
                                 <th className="p-4 font-semibold text-slate-600">Fornecedor</th>
                                 <th className="p-4 font-semibold text-slate-600 w-32">Data</th>
@@ -267,13 +268,12 @@ export default function PropostasPage() {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {loading ? (
-                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">Carregando...</td></tr>
+                                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Carregando...</td></tr>
                             ) : propostas.length === 0 ? (
-                                <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nenhuma proposta cadastrada.</td></tr>
+                                <tr><td colSpan={5} className="p-8 text-center text-slate-500">Nenhuma proposta cadastrada.</td></tr>
                             ) : (
                                 propostas.map((item) => (
                                     <tr key={item.id} className={`hover:bg-slate-50 transition-colors ${editId === item.id ? 'bg-blue-50' : ''}`}>
-                                        <td className="p-4 font-medium text-slate-900">{item.numero}</td>
                                         <td className="p-4 text-slate-600">{item.licitacao?.nome}</td>
                                         <td className="p-4 text-slate-600">{item.fornecedor?.nome}</td>
                                         <td className="p-4 text-slate-600">

@@ -138,7 +138,8 @@ export default function ProdutosPage() {
                             <input
                                 type="text"
                                 value={form.nome}
-                                onChange={e => setForm({ ...form, nome: e.target.value })}
+                                onChange={e => setForm({ ...form, nome: e.target.value.toUpperCase() })}
+                                style={{ textTransform: 'uppercase' }}
                                 placeholder="Ex: Cimento CP-II"
                                 className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500"
                                 required

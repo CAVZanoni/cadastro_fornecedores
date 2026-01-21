@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
 import { UserPlus, Trash2, Mail, User as UserIcon, Shield } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 type User = {
     id: number
@@ -11,14 +13,26 @@ type User = {
 }
 
 export default function UsuariosPage() {
+    const { data: session, status } = useSession()
+    const router = useRouter()
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState(true)
     const [form, setForm] = useState({ name: '', email: '', password: '' })
     const [submitting, setSubmitting] = useState(false)
 
     useEffect(() => {
-        fetchUsers()
-    }, [])
+        if (status === 'unauthenticated') {
+            router.push('/login')
+        } else if (status === 'authenticated' && session.user?.email !== 'admin@sistema.com') {
+            router.push('/')
+        }
+    }, [status, session, router])
+
+    useEffect(() => {
+        if (status === 'authenticated' && session.user?.email === 'admin@sistema.com') {
+            fetchUsers()
+        }
+    }, [status, session])
 
     async function fetchUsers() {
         try {
@@ -57,6 +71,10 @@ export default function UsuariosPage() {
         }
     }
 
+    if (status === 'loading' || (status === 'authenticated' && session.user?.email !== 'admin@sistema.com')) {
+        return <div className="p-8 text-center text-slate-500 uppercase">Verificando permissões...</div>
+    }
+
     return (
         <div className="p-6 max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
             <header className="flex flex-col gap-1">
@@ -82,9 +100,10 @@ export default function UsuariosPage() {
                                 <input
                                     required
                                     className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
-                                    placeholder="Ex: Amanda Aliati"
+                                    placeholder="Ex: AMANDA ALIATI"
                                     value={form.name}
-                                    onChange={e => setForm({ ...form, name: e.target.value })}
+                                    onChange={e => setForm({ ...form, name: e.target.value.toUpperCase() })}
+                                    style={{ textTransform: 'uppercase' }}
                                 />
                             </div>
                         </div>
