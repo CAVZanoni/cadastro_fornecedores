@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, MessageCircle } from 'lucide-react'
 
 type Fornecedor = {
     id: number
@@ -10,6 +10,7 @@ type Fornecedor = {
     whatsapp: string | null
     email: string | null
     cnpj: string | null
+    observacoes: string | null
     createdAt: string
 }
 
@@ -25,7 +26,8 @@ export default function FornecedoresPage() {
         contato: '',
         whatsapp: '',
         email: '',
-        cnpj: ''
+        cnpj: '',
+        observacoes: ''
     })
 
     useEffect(() => {
@@ -49,6 +51,12 @@ export default function FornecedoresPage() {
             .replace(/^(\d{2})(\d)/, '($1) $2')
             .replace(/(\d{5})(\d)/, '$1-$2')
             .replace(/(-\d{4})\d+?$/, '$1')
+    }
+
+    const formatWhatsAppLink = (whatsapp: string | null) => {
+        if (!whatsapp) return undefined
+        const numbers = whatsapp.replace(/\D/g, '')
+        return `https://api.whatsapp.com/send?phone=55${numbers}`
     }
 
     async function fetchData() {
@@ -79,6 +87,9 @@ export default function FornecedoresPage() {
             if (res.ok) {
                 resetForm()
                 fetchData()
+            } else {
+                const err = await res.json()
+                alert(err.error || 'Erro ao salvar fornecedor')
             }
         } finally {
             setSubmitting(false)
@@ -86,7 +97,7 @@ export default function FornecedoresPage() {
     }
 
     function resetForm() {
-        setForm({ nome: '', contato: '', whatsapp: '', email: '', cnpj: '' })
+        setForm({ nome: '', contato: '', whatsapp: '', email: '', cnpj: '', observacoes: '' })
         setEditId(null)
     }
 
@@ -97,7 +108,8 @@ export default function FornecedoresPage() {
             contato: item.contato || '',
             whatsapp: item.whatsapp || '',
             email: item.email || '',
-            cnpj: item.cnpj || ''
+            cnpj: item.cnpj || '',
+            observacoes: item.observacoes || ''
         })
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -129,7 +141,8 @@ export default function FornecedoresPage() {
                             <input
                                 type="text"
                                 value={form.nome}
-                                onChange={e => setForm({ ...form, nome: e.target.value })}
+                                onChange={e => setForm({ ...form, nome: e.target.value.toUpperCase() })}
+                                style={{ textTransform: 'uppercase' }}
                                 className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                 required
                             />
@@ -139,7 +152,8 @@ export default function FornecedoresPage() {
                             <input
                                 type="text"
                                 value={form.contato}
-                                onChange={e => setForm({ ...form, contato: e.target.value })}
+                                onChange={e => setForm({ ...form, contato: e.target.value.toUpperCase() })}
+                                style={{ textTransform: 'uppercase' }}
                                 className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
@@ -174,6 +188,17 @@ export default function FornecedoresPage() {
                             />
                         </div>
 
+                        <div className="md:col-span-2 lg:col-span-3">
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Observações</label>
+                            <textarea
+                                value={form.observacoes}
+                                onChange={e => setForm({ ...form, observacoes: e.target.value.toUpperCase() })}
+                                style={{ textTransform: 'uppercase' }}
+                                placeholder="Informações adicionais sobre o fornecedor..."
+                                className="w-full rounded-md border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 outline-none h-20 resize-none"
+                            />
+                        </div>
+
                         <div className="flex gap-2">
                             {editId && (
                                 <button
@@ -204,14 +229,15 @@ export default function FornecedoresPage() {
                                     <th className="p-4 font-semibold text-slate-600">Contato</th>
                                     <th className="p-4 font-semibold text-slate-600">WhatsApp</th>
                                     <th className="p-4 font-semibold text-slate-600">CNPJ</th>
+                                    <th className="p-4 font-semibold text-slate-600">Observações</th>
                                     <th className="p-4 font-semibold text-slate-600 text-right w-24">Ações</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {loading ? (
-                                    <tr><td colSpan={5} className="p-8 text-center text-slate-500">Carregando...</td></tr>
+                                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">Carregando...</td></tr>
                                 ) : data.length === 0 ? (
-                                    <tr><td colSpan={5} className="p-8 text-center text-slate-500">Nenhum fornecedor cadastrado.</td></tr>
+                                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nenhum fornecedor cadastrado.</td></tr>
                                 ) : (
                                     data.map((item) => (
                                         <tr key={item.id} className={`hover:bg-slate-50 transition-colors ${editId === item.id ? 'bg-blue-50' : ''}`}>
@@ -220,8 +246,24 @@ export default function FornecedoresPage() {
                                                 {item.email && <div className="text-xs text-slate-400 font-normal">{item.email}</div>}
                                             </td>
                                             <td className="p-4 text-slate-600">{item.contato || '-'}</td>
-                                            <td className="p-4 text-slate-600">{item.whatsapp ? maskPhone(item.whatsapp) : '-'}</td>
+                                            <td className="p-4 text-slate-600">
+                                                {item.whatsapp ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <span>{maskPhone(item.whatsapp)}</span>
+                                                        <a
+                                                            href={formatWhatsAppLink(item.whatsapp)}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center text-green-600 hover:text-green-700 transition-colors"
+                                                            title="Abrir no WhatsApp"
+                                                        >
+                                                            <MessageCircle size={16} />
+                                                        </a>
+                                                    </div>
+                                                ) : '-'}
+                                            </td>
                                             <td className="p-4 text-slate-600">{item.cnpj ? maskCNPJ(item.cnpj) : '-'}</td>
+                                            <td className="p-4 text-slate-600 text-sm max-w-xs truncate" title={item.observacoes ?? undefined}>{item.observacoes || '-'}</td>
                                             <td className="p-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <button

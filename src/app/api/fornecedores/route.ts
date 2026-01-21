@@ -15,11 +15,19 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { nome, contato, whatsapp, email, cnpj } = body
+        const { nome, contato, whatsapp, email, cnpj, observacoes } = body
         if (!nome) return NextResponse.json({ error: 'Nome obrigatório' }, { status: 400 })
 
+        // Check for duplicate name (case-insensitive)
+        const existing = await prisma.fornecedor.findFirst({
+            where: { nome: { equals: nome, mode: 'insensitive' } }
+        })
+        if (existing) {
+            return NextResponse.json({ error: 'Já existe um fornecedor com este nome' }, { status: 400 })
+        }
+
         const data = await prisma.fornecedor.create({
-            data: { nome, contato, whatsapp, email, cnpj }
+            data: { nome, contato, whatsapp, email, cnpj, observacoes }
         })
         return NextResponse.json(data)
     } catch {

@@ -9,6 +9,19 @@ export async function PUT(
         const { id } = await params
         const json = await request.json()
 
+        // Check for duplicate name (case-insensitive), excluding current record
+        if (json.nome) {
+            const existing = await prisma.fornecedor.findFirst({
+                where: {
+                    nome: { equals: json.nome, mode: 'insensitive' },
+                    id: { not: Number(id) }
+                }
+            })
+            if (existing) {
+                return NextResponse.json({ error: 'Já existe um fornecedor com este nome' }, { status: 400 })
+            }
+        }
+
         const updated = await prisma.fornecedor.update({
             where: { id: Number(id) },
             data: {
@@ -16,7 +29,8 @@ export async function PUT(
                 contato: json.contato,
                 whatsapp: json.whatsapp,
                 email: json.email,
-                cnpj: json.cnpj
+                cnpj: json.cnpj,
+                observacoes: json.observacoes
             }
         })
         return NextResponse.json(updated)

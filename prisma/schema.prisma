@@ -28,6 +28,7 @@ model Fornecedor {
   whatsapp  String?
   email     String?
   cnpj      String?
+  observacoes String?
   propostas Proposta[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
