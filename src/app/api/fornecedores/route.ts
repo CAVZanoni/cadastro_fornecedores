@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +31,18 @@ export async function POST(request: Request) {
         const data = await prisma.fornecedor.create({
             data: { nome, contato, whatsapp, email, cnpj, observacoes }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'CREATE',
+                'FORNECEDOR',
+                data.id,
+                `Criou fornecedor: ${data.nome}`
+            )
+        }
+
         return NextResponse.json(data)
     } catch {
         return NextResponse.json({ error: 'Erro ao criar fornecedor' }, { status: 500 })

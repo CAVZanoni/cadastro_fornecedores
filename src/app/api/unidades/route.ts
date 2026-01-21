@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +28,18 @@ export async function POST(request: Request) {
         const data = await prisma.unidadeMedida.create({
             data: { sigla, nome }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'CREATE',
+                'UNIDADE',
+                data.id,
+                `Criou unidade: ${data.sigla}`
+            )
+        }
+
         return NextResponse.json(data)
     } catch {
         return NextResponse.json({ error: 'Erro ao criar unidade de medida' }, { status: 500 })

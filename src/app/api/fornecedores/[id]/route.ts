@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export async function PUT(
     request: Request,
@@ -33,6 +35,18 @@ export async function PUT(
                 observacoes: json.observacoes
             }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'UPDATE',
+                'FORNECEDOR',
+                updated.id,
+                `Atualizou fornecedor: ${updated.nome}`
+            )
+        }
+
         return NextResponse.json(updated)
     } catch {
         return NextResponse.json({ error: 'Erro ao atualizar fornecedor' }, { status: 500 })
@@ -45,9 +59,25 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params
+
+        // Fetch to get the name before deleting
+        const item = await prisma.fornecedor.findUnique({ where: { id: Number(id) } })
+
         await prisma.fornecedor.delete({
             where: { id: parseInt(id) }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id && item) {
+            await recordLog(
+                Number(session.user.id),
+                'DELETE',
+                'FORNECEDOR',
+                Number(id),
+                `Excluiu fornecedor: ${item.nome}`
+            )
+        }
+
         return NextResponse.json({ message: 'Fornecedor excluído com sucesso' })
     } catch {
         return NextResponse.json({ error: 'Erro ao excluir fornecedor' }, { status: 500 })

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export async function POST(request: Request) {
     try {
@@ -25,6 +27,18 @@ export async function POST(request: Request) {
             },
             include: { produto: true }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'CREATE',
+                'ITEM',
+                data.id,
+                `Adicionou item à proposta ${propostaId}: ${data.produto.nome}`
+            )
+        }
+
         return NextResponse.json(data)
     } catch {
         return NextResponse.json({ error: 'Erro ao adicionar item' }, { status: 500 })

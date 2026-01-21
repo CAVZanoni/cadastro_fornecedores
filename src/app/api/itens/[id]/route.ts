@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export async function PUT(
     request: Request,
@@ -16,8 +18,21 @@ export async function PUT(
                 quantidade: Number(json.quantidade),
                 precoUnitario: Number(json.precoUnitario),
                 observacoes: json.observacoes || undefined
-            }
+            },
+            include: { produto: true }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'UPDATE',
+                'ITEM',
+                updated.id,
+                `Atualizou item ${id} da proposta ${updated.propostaId}: ${updated.produto.nome}`
+            )
+        }
+
         return NextResponse.json(updated)
     } catch {
         return NextResponse.json({ error: 'Erro ao atualizar item' }, { status: 500 })
@@ -30,9 +45,26 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params
+        const item = await prisma.itemProposta.findUnique({
+            where: { id: Number(id) },
+            include: { produto: true }
+        })
+
         await prisma.itemProposta.delete({
             where: { id: Number(id) }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id && item) {
+            await recordLog(
+                Number(session.user.id),
+                'DELETE',
+                'ITEM',
+                Number(id),
+                `Removeu item ${id} da proposta ${item.propostaId}: ${item.produto.nome}`
+            )
+        }
+
         return NextResponse.json({ success: true })
     } catch {
         return NextResponse.json({ error: 'Erro ao deletar item' }, { status: 500 })

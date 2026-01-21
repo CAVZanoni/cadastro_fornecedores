@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,6 +38,18 @@ export async function POST(request: Request) {
                 data: json.data ? new Date(json.data) : undefined
             }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'CREATE',
+                'LICITACAO',
+                licitacao.id,
+                `Criou licitação: ${licitacao.nome}`
+            )
+        }
+
         return NextResponse.json(licitacao)
     } catch {
         return NextResponse.json({ error: 'Erro ao criar licitação' }, { status: 500 })

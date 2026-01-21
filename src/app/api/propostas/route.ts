@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,8 +43,24 @@ export async function POST(request: Request) {
                 data: body.data ? new Date(body.data) : undefined,
                 arquivoUrl: body.arquivoUrl || undefined,
                 observacoes: body.observacoes || undefined
+            },
+            include: {
+                licitacao: true,
+                fornecedor: true
             }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'CREATE',
+                'PROPOSTA',
+                data.id,
+                `Criou proposta: ${data.licitacao.nome} - ${data.fornecedor.nome}`
+            )
+        }
+
         return NextResponse.json(data)
     } catch {
         return NextResponse.json({ error: 'Erro ao criar proposta' }, { status: 500 })

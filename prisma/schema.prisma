@@ -114,6 +114,18 @@ model User {
   name      String?
   email     String   @unique
   password  String
+  logs      AuditLog[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // "CREATE", "UPDATE", "DELETE"
+  entity    String   // "LICITACAO", "FORNECEDOR", "PRODUTO", "PROPOSTA", "ITEM", "USER"
+  entityId  Int?
+  details   String?  // Descrição rápida ou JSON
+  createdAt DateTime @default(now())
 }

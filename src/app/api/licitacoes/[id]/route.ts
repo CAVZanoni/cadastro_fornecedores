@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export async function PUT(
     request: Request,
@@ -17,6 +19,18 @@ export async function PUT(
                 data: json.data ? new Date(json.data) : undefined
             }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'UPDATE',
+                'LICITACAO',
+                updated.id,
+                `Atualizou licitação: ${updated.nome}`
+            )
+        }
+
         return NextResponse.json(updated)
     } catch {
         return NextResponse.json({ error: 'Erro ao atualizar licitação' }, { status: 500 })
@@ -29,9 +43,23 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params
+        const item = await prisma.licitacao.findUnique({ where: { id: Number(id) } })
+
         await prisma.licitacao.delete({
             where: { id: Number(id) }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id && item) {
+            await recordLog(
+                Number(session.user.id),
+                'DELETE',
+                'LICITACAO',
+                Number(id),
+                `Excluiu licitação: ${item.nome}`
+            )
+        }
+
         return NextResponse.json({ success: true })
     } catch {
         return NextResponse.json({ error: 'Erro ao deletar licitação. Verifique se há propostas vinculadas.' }, { status: 500 })

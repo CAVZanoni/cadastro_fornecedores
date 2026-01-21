@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { recordLog } from '@/lib/audit'
 import bcrypt from 'bcryptjs'
 import { getServerSession } from 'next-auth'
 
@@ -52,6 +53,16 @@ export async function POST(request: Request) {
                 password: hashedPassword
             }
         })
+
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'CREATE',
+                'USER',
+                user.id,
+                `Criou usuário: ${user.email}`
+            )
+        }
 
         return NextResponse.json({ id: user.id, name: user.name, email: user.email })
     } catch {

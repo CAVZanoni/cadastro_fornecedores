@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Gavel, Users, Package, FileText, Settings, LogOut, Shield } from 'lucide-react'
+import { LayoutDashboard, Gavel, Users, Package, FileText, Settings, LogOut, Shield, Activity } from 'lucide-react'
 import { clsx } from 'clsx'
 import { signOut, useSession } from 'next-auth/react'
 
@@ -14,6 +14,7 @@ const links = [
     { name: 'Relatórios', href: '/relatorios', icon: FileText },
     { name: 'Configurações', href: '/configuracoes', icon: Settings },
     { name: 'Usuários', href: '/usuarios', icon: Shield },
+    { name: 'Logs', href: '/logs', icon: Activity },
 ]
 
 export function Sidebar() {
@@ -21,7 +22,7 @@ export function Sidebar() {
     const { data: session } = useSession()
 
     const filteredLinks = links.filter(link => {
-        if (link.href === '/usuarios') {
+        if (link.href === '/usuarios' || link.href === '/logs') {
             return session?.user?.email === 'admin@sistema.com'
         }
         return true

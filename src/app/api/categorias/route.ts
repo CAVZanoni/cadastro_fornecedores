@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
+import { recordLog } from '@/lib/audit'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,6 +28,18 @@ export async function POST(request: Request) {
         const data = await prisma.categoriaProduto.create({
             data: { nome }
         })
+
+        const session = await getServerSession()
+        if (session?.user?.id) {
+            await recordLog(
+                Number(session.user.id),
+                'CREATE',
+                'CATEGORIA',
+                data.id,
+                `Criou categoria: ${data.nome}`
+            )
+        }
+
         return NextResponse.json(data)
     } catch (_error) {
         console.error(_error)
