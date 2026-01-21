@@ -7,7 +7,11 @@ import Link from 'next/link'
 type ItemProposta = {
     id: number
     produtoId: number
-    produto: { nome: string, unidade: string }
+    produto: {
+        nome: string
+        unidade?: { sigla: string } | null
+        unidadeTexto?: string | null
+    }
     quantidade: number
     precoUnitario: number
     precoTotal: number
@@ -25,7 +29,12 @@ type PropostaDetalhe = {
     observacoes?: string | null
 }
 
-type ProdutoOption = { id: number, nome: string, unidade: string }
+type ProdutoOption = {
+    id: number
+    nome: string
+    unidade?: { sigla: string; nome: string } | null
+    unidadeTexto?: string | null
+}
 
 export default function PropostaDetalhe({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params)
@@ -221,7 +230,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                                 >
                                     <option value="">Selecione...</option>
                                     {produtos.map(p => (
-                                        <option key={p.id} value={p.id}>{p.nome} ({p.unidade})</option>
+                                        <option key={p.id} value={p.id}>{p.nome} ({p.unidade?.sigla || p.unidadeTexto || '-'})</option>
                                     ))}
                                 </select>
                             </div>
@@ -299,7 +308,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                                 <tr key={item.id} className={`hover:bg-slate-50 ${editId === item.id ? 'bg-blue-50' : ''}`}>
                                     <td className="p-4 font-medium text-slate-800">
                                         {item.produto?.nome}
-                                        <span className="text-slate-400 font-normal ml-1">({item.produto?.unidade})</span>
+                                        <span className="text-slate-400 font-normal ml-1">({item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-'})</span>
                                     </td>
                                     <td className="p-4 text-right text-slate-600">{item.quantidade}</td>
                                     <td className="p-4 text-right text-slate-600">

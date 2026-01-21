@@ -6,7 +6,17 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
     try {
         const data = await prisma.proposta.findMany({
-            include: { licitacao: true, fornecedor: true, itens: { include: { produto: true } } },
+            include: {
+                licitacao: true,
+                fornecedor: true,
+                itens: {
+                    include: {
+                        produto: {
+                            include: { unidade: true }
+                        }
+                    }
+                }
+            },
             orderBy: { createdAt: 'desc' }
         })
         return NextResponse.json(data)
