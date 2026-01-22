@@ -111,8 +111,9 @@ export default function LoginPage() {
                     </form>
                 </Card>
 
-                <div className="mt-8 text-center text-slate-500 text-sm">
-                    Versão 2.1.0 • Acesso Restrito ao Desenvolvedor
+                <div className="mt-8 text-center text-slate-500 text-xs flex flex-col gap-1">
+                    <span>Versão 2.1.0 • Acesso Restrito</span>
+                    <span>Desenvolvido por <span className="text-slate-400 font-medium">César Augusto Vargas Zanoni</span></span>
                 </div>
             </div>
         </div>

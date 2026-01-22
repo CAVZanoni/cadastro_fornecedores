@@ -61,8 +61,9 @@ export function Sidebar() {
                 <span className="font-medium">Sair do Sistema</span>
             </button>
 
-            <div className="text-xs text-slate-600 mt-auto text-center pt-4">
-                &copy; 2026 Sistema v1.0
+            <div className="text-[10px] text-slate-600 mt-auto text-center pt-4 flex flex-col gap-1">
+                <span>&copy; 2026 Sistema v1.0</span>
+                <span className="text-slate-500">Desenvolvido por <span className="text-slate-400">César Augusto Vargas Zanoni</span></span>
             </div>
         </div>
     )
