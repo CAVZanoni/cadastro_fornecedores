@@ -28,6 +28,9 @@ export default function ProdutosPage() {
     const [search, setSearch] = useState('')
     const [sortConfig, setSortConfig] = useState<{ key: keyof Produto | 'categoria_nome' | 'unidade_sigla', direction: 'asc' | 'desc' }>({ key: 'nome', direction: 'asc' })
 
+    const [unitSearch, setUnitSearch] = useState('')
+    const [showUnitsDropdown, setShowUnitsDropdown] = useState(false)
+
     const [form, setForm] = useState<{
         nome: string;
         categoriaId: string;
@@ -122,6 +125,8 @@ export default function ProdutosPage() {
 
     function resetForm() {
         setForm({ nome: '', categoriaId: '', unidadeId: '', unidadeIds: [] })
+        setUnitSearch('')
+        setShowUnitsDropdown(false)
         setEditId(null)
     }
 
@@ -258,24 +263,81 @@ export default function ProdutosPage() {
                             </div>
                         </div>
 
-                        <div>
+                        <div className="relative">
                             <label className="block text-sm font-medium text-slate-700 mb-2">Unidades de Medida Permitidas</label>
-                            <div className="flex flex-wrap gap-2">
-                                {unidades.map(uni => (
-                                    <button
-                                        key={uni.id}
-                                        type="button"
-                                        onClick={() => toggleUnidade(uni.id)}
-                                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${form.unidadeIds.includes(uni.id)
-                                            ? 'bg-blue-100 border-blue-300 text-blue-700 ring-2 ring-blue-500/20'
-                                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
-                                            }`}
-                                    >
-                                        {uni.sigla} - {uni.nome}
-                                    </button>
-                                ))}
-                                {unidades.length === 0 && <span className="text-sm text-slate-400 italic">Carregando unidades...</span>}
+
+                            {/* Selected Units Tags */}
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {form.unidadeIds.map(uid => {
+                                    const uni = unidades.find(u => u.id === uid)
+                                    if (!uni) return null
+                                    return (
+                                        <span
+                                            key={uid}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-600 text-white text-xs font-bold shadow-sm"
+                                        >
+                                            {uni.sigla}
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleUnidade(uid)}
+                                                className="hover:bg-blue-500 rounded-full p-0.5 transition-colors"
+                                            >
+                                                <Plus size={12} className="rotate-45" />
+                                            </button>
+                                        </span>
+                                    )
+                                })}
+                                {form.unidadeIds.length === 0 && (
+                                    <span className="text-sm text-slate-400 italic">Nenhuma unidade selecionada</span>
+                                )}
                             </div>
+
+                            {/* Search / Dropdown Input */}
+                            <div className="relative group max-w-md">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar e adicionar unidades..."
+                                    value={unitSearch}
+                                    onChange={e => setUnitSearch(e.target.value.toUpperCase())}
+                                    onFocus={() => setShowUnitsDropdown(true)}
+                                    className="w-full pl-10 pr-4 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                />
+
+                                {showUnitsDropdown && (
+                                    <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                                        {unidades
+                                            .filter(u =>
+                                                u.sigla.toUpperCase().includes(unitSearch) ||
+                                                (u.nome?.toUpperCase().includes(unitSearch))
+                                            )
+                                            .map(uni => (
+                                                <button
+                                                    key={uni.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        toggleUnidade(uni.id)
+                                                        // Keep open for multi-selection, but clear search
+                                                        setUnitSearch('')
+                                                    }}
+                                                    className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center justify-between ${form.unidadeIds.includes(uni.id) ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-700'}`}
+                                                >
+                                                    <span>{uni.sigla} - {uni.nome}</span>
+                                                    {form.unidadeIds.includes(uni.id) && <Plus size={14} className="rotate-45" />}
+                                                </button>
+                                            ))}
+                                        {unidades.length === 0 && <div className="p-4 text-center text-slate-500 text-sm italic">Nenhuma unidade disponível</div>}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Backdrop for click outside */}
+                            {showUnitsDropdown && (
+                                <div
+                                    className="fixed inset-0 z-0"
+                                    onClick={() => setShowUnitsDropdown(false)}
+                                />
+                            )}
                         </div>
                     </form>
                 </Card>

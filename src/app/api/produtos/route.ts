@@ -16,7 +16,7 @@ export async function GET() {
                     orderBy: { sigla: 'asc' }
                 }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { nome: 'asc' }
         })
         return NextResponse.json(data)
     } catch {

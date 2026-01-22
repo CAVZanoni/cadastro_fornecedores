@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        const data = await prisma.fornecedor.findMany({ orderBy: { createdAt: 'desc' } })
+        const data = await prisma.fornecedor.findMany({ orderBy: { nome: 'asc' } })
         return NextResponse.json(data)
     } catch {
         return NextResponse.json({ error: 'Erro ao buscar fornecedores' }, { status: 500 })

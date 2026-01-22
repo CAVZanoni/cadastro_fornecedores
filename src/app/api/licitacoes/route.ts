@@ -13,7 +13,7 @@ export async function GET() {
                 propostas: true,
                 municipio: true
             },
-            orderBy: { id: 'desc' }
+            orderBy: { nome: 'asc' }
         })
         return NextResponse.json(licitacoes)
     } catch {
