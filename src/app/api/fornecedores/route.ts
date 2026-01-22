@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { recordLog } from '@/lib/audit'
+import { authOptions } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
             data: { nome, contato, whatsapp, email, cnpj, observacoes }
         })
 
-        const session = await getServerSession()
+        const session = await getServerSession(authOptions)
         if (session?.user?.id) {
             await recordLog(
                 Number(session.user.id),

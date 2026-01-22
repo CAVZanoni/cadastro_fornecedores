@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { recordLog } from '@/lib/audit'
+import { authOptions } from '@/lib/auth'
 
 export async function PUT(
     request: Request,
@@ -26,7 +27,7 @@ export async function PUT(
             }
         })
 
-        const session = await getServerSession()
+        const session = await getServerSession(authOptions)
         if (session?.user?.id) {
             await recordLog(
                 Number(session.user.id),
