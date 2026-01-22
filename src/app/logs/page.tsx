@@ -5,13 +5,8 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import {
     Clock,
-    User as UserIcon,
     Activity,
     Search,
-    Filter,
-    ArrowUpDown,
-    CheckCircle2,
-    AlertCircle,
     Trash2,
     FileEdit,
     PlusCircle

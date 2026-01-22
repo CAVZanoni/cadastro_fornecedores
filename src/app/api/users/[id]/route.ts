@@ -6,15 +6,16 @@ import { authOptions } from '@/lib/auth'
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    props: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await props.params
         const session = await getServerSession(authOptions)
         if (!session || session.user?.email !== 'admin@sistema.com') {
             return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
         }
 
-        const userId = parseInt(params.id)
+        const userId = parseInt(id)
 
         // Check if user exists
         const user = await prisma.user.findUnique({
