@@ -269,7 +269,9 @@ export default function RelatoriosPage() {
                                         <td className="p-2 text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis" title={item.produto}>{item.produto}</td>
                                         <td className="p-2 text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis" title={item.categoria}>{item.categoria}</td>
                                         <td className="p-2 text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis">{item.unidade}</td>
-                                        <td className="p-2 text-slate-600 text-right font-mono">{item.quantidade}</td>
+                                        <td className="p-2 text-slate-600 text-right font-mono">
+                                            {item.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
+                                        </td>
                                         <td className="p-2 text-slate-600 text-right font-mono">{formatCurrency(item.precoUnitario)}</td>
                                         <td className="p-2 text-slate-900 text-right font-mono font-bold">{formatCurrency(item.precoTotal)}</td>
                                         <td className="p-2 text-slate-500 text-[10px] italic space-y-0.5 max-w-[150px] overflow-hidden">

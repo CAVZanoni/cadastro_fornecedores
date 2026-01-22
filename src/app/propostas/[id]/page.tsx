@@ -310,7 +310,9 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                                         {item.produto?.nome}
                                         <span className="text-slate-400 font-normal ml-1">({item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-'})</span>
                                     </td>
-                                    <td className="p-4 text-right text-slate-600">{item.quantidade}</td>
+                                    <td className="p-4 text-right text-slate-600">
+                                        {item.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
+                                    </td>
                                     <td className="p-4 text-right text-slate-600">
                                         {item.precoUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </td>
