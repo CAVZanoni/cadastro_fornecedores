@@ -169,8 +169,8 @@ export default function ProdutosPage() {
     })
 
     const sortedData = [...filteredData].sort((a, b) => {
-        let aVal: any = a[sortConfig.key as keyof Produto]
-        let bVal: any = b[sortConfig.key as keyof Produto]
+        let aVal: string | number | null | undefined = ''
+        let bVal: string | number | null | undefined = ''
 
         if (sortConfig.key === 'categoria_nome') {
             aVal = a.categoria?.nome || ''
@@ -178,6 +178,11 @@ export default function ProdutosPage() {
         } else if (sortConfig.key === 'unidade_sigla') {
             aVal = (a.unidades?.map(u => u.sigla).join(',') || a.unidade?.sigla || a.unidadeTexto || '')
             bVal = (b.unidades?.map(u => u.sigla).join(',') || b.unidade?.sigla || b.unidadeTexto || '')
+        } else {
+            const rawA = a[sortConfig.key as keyof Produto]
+            const rawB = b[sortConfig.key as keyof Produto]
+            aVal = (typeof rawA === 'string' || typeof rawA === 'number') ? rawA : String(rawA ?? '')
+            bVal = (typeof rawB === 'string' || typeof rawB === 'number') ? rawB : String(rawB ?? '')
         }
 
         if (aVal === bVal) return 0
@@ -262,8 +267,8 @@ export default function ProdutosPage() {
                                         type="button"
                                         onClick={() => toggleUnidade(uni.id)}
                                         className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${form.unidadeIds.includes(uni.id)
-                                                ? 'bg-blue-100 border-blue-300 text-blue-700 ring-2 ring-blue-500/20'
-                                                : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                                            ? 'bg-blue-100 border-blue-300 text-blue-700 ring-2 ring-blue-500/20'
+                                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                                             }`}
                                     >
                                         {uni.sigla} - {uni.nome}

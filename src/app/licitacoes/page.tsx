@@ -181,12 +181,17 @@ export default function LicitacoesPage() {
     })
 
     const sortedLicitacoes = [...filteredLicitacoes].sort((a, b) => {
-        let aVal: any = a[sortConfig.key as keyof Licitacao]
-        let bVal: any = b[sortConfig.key as keyof Licitacao]
+        let aVal: string | number | null | undefined = ''
+        let bVal: string | number | null | undefined = ''
 
         if (sortConfig.key === 'municipio_nome') {
             aVal = a.municipio?.nomeCompleto || ''
             bVal = b.municipio?.nomeCompleto || ''
+        } else {
+            const rawA = a[sortConfig.key as keyof Licitacao]
+            const rawB = b[sortConfig.key as keyof Licitacao]
+            aVal = (typeof rawA === 'string' || typeof rawA === 'number') ? rawA : String(rawA ?? '')
+            bVal = (typeof rawB === 'string' || typeof rawB === 'number') ? rawB : String(rawB ?? '')
         }
 
         if (aVal === bVal) return 0

@@ -170,8 +170,8 @@ export default function FornecedoresPage() {
     })
 
     const sortedData = [...filteredData].sort((a, b) => {
-        const aVal: any = a[sortConfig.key] || ''
-        const bVal: any = b[sortConfig.key] || ''
+        const aVal = a[sortConfig.key] ?? ''
+        const bVal = b[sortConfig.key] ?? ''
 
         if (aVal === bVal) return 0
         if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1

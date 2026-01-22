@@ -39,7 +39,7 @@ export async function POST(request: Request) {
                 unidadeTexto: unidadeLegacy || undefined,
                 unidades: {
                     connect: (Array.isArray(unidadeIds) && unidadeIds.length > 0)
-                        ? unidadeIds.map((id: any) => ({ id: Number(id) }))
+                        ? unidadeIds.map((id: number) => ({ id: Number(id) }))
                         : undefined
                 }
             },

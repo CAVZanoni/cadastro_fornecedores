@@ -21,7 +21,7 @@ export async function PUT(
                 unidadeTexto: json.unidadeLegacy || undefined,
                 unidades: {
                     set: Array.isArray(json.unidadeIds)
-                        ? json.unidadeIds.map((uid: any) => ({ id: Number(uid) }))
+                        ? json.unidadeIds.map((uid: number) => ({ id: Number(uid) }))
                         : []
                 }
             },
