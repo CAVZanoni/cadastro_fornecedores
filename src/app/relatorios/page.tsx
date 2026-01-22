@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Download, FileSpreadsheet, RefreshCw, ArrowUpDown } from 'lucide-react'
 
 type ReportItem = {
@@ -19,29 +19,73 @@ type ReportItem = {
     obsItem?: string
 }
 
-const SortIcon = ({ column, sortConfig }: { column: keyof ReportItem, sortConfig: { key: keyof ReportItem | null, direction: 'asc' | 'desc' } }) => {
+const SortIcon = ({ column, sortConfig }: { column: any, sortConfig: { key: keyof ReportItem | null, direction: 'asc' | 'desc' } }) => {
     if (sortConfig.key !== column) return <div className="w-4 h-4 opacity-0 group-hover:opacity-30 transition-opacity"><ArrowUpDown size={14} /></div>
     return <div className={`w-4 h-4 transition-transform ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`}><ArrowUpDown size={14} /></div>
 }
 
-const ThSort = ({ column, label, align = 'left', width, sortConfig, onSort }: {
-    column: keyof ReportItem,
+const ThSort = ({
+    column,
+    label,
+    align = 'left',
+    width,
+    sortConfig,
+    onSort,
+    onResize
+}: {
+    column: string,
     label: string,
     align?: 'left' | 'right' | 'center',
-    width?: string,
-    sortConfig: { key: keyof ReportItem | null, direction: 'asc' | 'desc' },
-    onSort: (key: keyof ReportItem) => void
-}) => (
-    <th
-        className={`p-2 bg-slate-100 cursor-pointer hover:bg-slate-200 transition-colors select-none group ${width} text-${align}`}
-        onClick={() => onSort(column)}
-    >
-        <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : align === 'center' ? 'justify-center' : 'justify-start'}`}>
-            {label}
-            <SortIcon column={column} sortConfig={sortConfig} />
-        </div>
-    </th>
-)
+    width: number,
+    sortConfig?: { key: keyof ReportItem | null, direction: 'asc' | 'desc' },
+    onSort?: (key: keyof ReportItem) => void,
+    onResize: (width: number) => void
+}) => {
+    const isResizing = useRef(false)
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        isResizing.current = true
+        const startX = e.pageX
+        const startWidth = width
+
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+            if (!isResizing.current) return
+            const delta = moveEvent.pageX - startX
+            onResize(Math.max(30, startWidth + delta))
+        }
+
+        const handleMouseUp = () => {
+            isResizing.current = false
+            document.removeEventListener('mousemove', handleMouseMove)
+            document.removeEventListener('mouseup', handleMouseUp)
+        }
+
+        document.addEventListener('mousemove', handleMouseMove)
+        document.addEventListener('mouseup', handleMouseUp)
+    }
+
+    return (
+        <th
+            className={`p-2 bg-slate-100 relative group text-${align} border-r border-slate-200 select-none font-semibold`}
+            style={{ width: `${width}px` }}
+        >
+            <div
+                className={`flex items-center gap-1 ${onSort ? 'cursor-pointer hover:text-blue-600 transition-colors' : ''} ${align === 'right' ? 'justify-end' : align === 'center' ? 'justify-center' : 'justify-start'}`}
+                onClick={() => onSort && onSort(column as keyof ReportItem)}
+            >
+                {label}
+                {sortConfig && <SortIcon column={column as keyof ReportItem} sortConfig={sortConfig} />}
+            </div>
+            <div
+                onMouseDown={handleMouseDown}
+                className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-blue-400 active:bg-blue-600 z-10 transition-colors"
+                title="Arraste para redimensionar"
+            />
+        </th>
+    )
+}
 
 export default function RelatoriosPage() {
     const [items, setItems] = useState<ReportItem[]>([])
@@ -54,6 +98,25 @@ export default function RelatoriosPage() {
     const [selectedMunicipio, setSelectedMunicipio] = useState('')
     const [selectedFornecedor, setSelectedFornecedor] = useState('')
     const [selectedLicitacao, setSelectedLicitacao] = useState('')
+
+    const [columnWidths, setColumnWidths] = useState<Record<string, number>>({
+        data: 85,
+        municipio: 100,
+        licitacao: 160,
+        fornecedor: 160,
+        produto: 200,
+        categoria: 100,
+        unidade: 60,
+        quantidade: 80,
+        precoUnitario: 100,
+        precoTotal: 120,
+        obs: 150,
+        anexo: 60
+    })
+
+    const handleResize = (column: string, newWidth: number) => {
+        setColumnWidths(prev => ({ ...prev, [column]: newWidth }))
+    }
 
     const fetchData = useCallback(() => {
         setLoading(true)
@@ -246,18 +309,18 @@ export default function RelatoriosPage() {
                     <table className="w-full text-left text-xs table-fixed">
                         <thead className="bg-slate-100 sticky top-0 z-10 shadow-sm font-semibold text-slate-700">
                             <tr>
-                                <ThSort column="data" label="Data" width="w-20" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="municipio" label="Município" width="w-24" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="licitacao" label="Licitação" width="w-40" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="fornecedor" label="Fornecedor" width="w-40" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="produto" label="Produto" width="w-40" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="categoria" label="Categoria" width="w-24" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="unidade" label="Unid." width="w-12" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="quantidade" label="Qtd" align="right" width="w-16" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="precoUnitario" label="Unitário" align="right" width="w-20" sortConfig={sortConfig} onSort={handleSort} />
-                                <ThSort column="precoTotal" label="Total" align="right" width="w-24" sortConfig={sortConfig} onSort={handleSort} />
-                                <th className="p-2 w-32 font-semibold bg-slate-100">Obs.</th>
-                                <th className="p-2 w-12 text-center bg-slate-100">Anexo</th>
+                                <ThSort column="data" label="Data" width={columnWidths.data} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('data', w)} />
+                                <ThSort column="municipio" label="Município" width={columnWidths.municipio} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('municipio', w)} />
+                                <ThSort column="licitacao" label="Licitação" width={columnWidths.licitacao} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('licitacao', w)} />
+                                <ThSort column="fornecedor" label="Fornecedor" width={columnWidths.fornecedor} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('fornecedor', w)} />
+                                <ThSort column="produto" label="Produto" width={columnWidths.produto} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('produto', w)} />
+                                <ThSort column="categoria" label="Categoria" width={columnWidths.categoria} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('categoria', w)} />
+                                <ThSort column="unidade" label="Unid." width={columnWidths.unidade} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('unidade', w)} />
+                                <ThSort column="quantidade" label="Qtd" align="right" width={columnWidths.quantidade} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('quantidade', w)} />
+                                <ThSort column="precoUnitario" label="Unitário" align="right" width={columnWidths.precoUnitario} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('precoUnitario', w)} />
+                                <ThSort column="precoTotal" label="Total" align="right" width={columnWidths.precoTotal} sortConfig={sortConfig} onSort={handleSort} onResize={(w) => handleResize('precoTotal', w)} />
+                                <ThSort column="obs" label="Obs." width={columnWidths.obs} onResize={(w) => handleResize('obs', w)} />
+                                <ThSort column="anexo" label="Anexo" align="center" width={columnWidths.anexo} onResize={(w) => handleResize('anexo', w)} />
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -282,7 +345,7 @@ export default function RelatoriosPage() {
                                         </td>
                                         <td className="p-2 text-slate-900 text-right font-mono font-bold">{formatCurrency(item.precoUnitario)}</td>
                                         <td className="p-2 text-slate-900 text-right font-mono font-bold">{formatCurrency(item.precoTotal)}</td>
-                                        <td className="p-2 text-slate-500 text-[10px] italic space-y-0.5 max-w-[150px] overflow-hidden">
+                                        <td className="p-2 text-slate-500 text-[10px] italic space-y-0.5 overflow-hidden" style={{ maxWidth: `${columnWidths.obs}px` }}>
                                             {item.obsProp && <div className="truncate" title={`Proposta: ${item.obsProp}`}>P: {item.obsProp}</div>}
                                             {item.obsItem && <div className="truncate" title={`Item: ${item.obsItem}`}>I: {item.obsItem}</div>}
                                         </td>
