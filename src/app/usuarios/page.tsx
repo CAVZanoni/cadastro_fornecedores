@@ -71,6 +71,26 @@ export default function UsuariosPage() {
         }
     }
 
+    async function handleDelete(id: number, name: string) {
+        if (!confirm(`Tem certeza que deseja deletar o usuário ${name}?`)) return
+
+        try {
+            const res = await fetch(`/api/users/${id}`, {
+                method: 'DELETE'
+            })
+
+            if (res.ok) {
+                fetchUsers()
+                alert('Usuário deletado com sucesso!')
+            } else {
+                const err = await res.json()
+                alert(err.error || 'Erro ao deletar usuário')
+            }
+        } catch {
+            alert('Erro ao deletar usuário')
+        }
+    }
+
     if (status === 'loading' || (status === 'authenticated' && session.user?.email !== 'admin@sistema.com')) {
         return <div className="p-8 text-center text-slate-500 uppercase">Verificando permissões...</div>
     }
@@ -172,16 +192,26 @@ export default function UsuariosPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-6">
                                         <div className="text-right hidden sm:block">
                                             <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Membro desde</p>
                                             <p className="text-xs text-slate-600">{new Date(user.createdAt).toLocaleDateString()}</p>
                                         </div>
+                                        {user.email !== 'admin@sistema.com' && (
+                                            <button
+                                                onClick={() => handleDelete(user.id, user.name || user.email || '')}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Deletar Usuário"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    )}
+                    )
+                    }
                 </div>
             </div>
         </div>
