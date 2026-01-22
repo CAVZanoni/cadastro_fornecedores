@@ -12,13 +12,29 @@ export async function PUT(
         const { id } = await params
         const json = await request.json()
 
+        // Sync with legacy columns for better visibility
+        let unitIdToSave = undefined
+        let unitTextToSave = undefined
+
+        if (Array.isArray(json.unidadeIds) && json.unidadeIds.length > 0) {
+            const units = await prisma.unidadeMedida.findMany({
+                where: { id: { in: json.unidadeIds.map(Number) } }
+            })
+            if (units.length > 0) {
+                // Find index of first selected unit ID in the units array to get its sigla if needed
+                // but we just need the first ID from the input and joined siglas
+                unitIdToSave = Number(json.unidadeIds[0])
+                unitTextToSave = units.map(u => u.sigla).join(', ')
+            }
+        }
+
         const updated = await prisma.produto.update({
             where: { id: Number(id) },
             data: {
                 nome: json.nome,
                 categoriaId: json.categoriaId ? Number(json.categoriaId) : undefined,
-                unidadeId: json.unidadeId ? Number(json.unidadeId) : undefined,
-                unidadeTexto: json.unidadeLegacy || undefined,
+                unidadeId: unitIdToSave,
+                unidadeTexto: unitTextToSave || json.unidadeLegacy || undefined,
                 unidades: {
                     set: Array.isArray(json.unidadeIds)
                         ? json.unidadeIds.map((uid: number) => ({ id: Number(uid) }))

@@ -31,12 +31,26 @@ export async function POST(request: Request) {
 
         if (!nome) return NextResponse.json({ error: 'Nome é obrigatório' }, { status: 400 })
 
+        // Sync with legacy columns for better visibility
+        let unitIdToSave = undefined
+        let unitTextToSave = undefined
+
+        if (Array.isArray(unidadeIds) && unidadeIds.length > 0) {
+            const units = await prisma.unidadeMedida.findMany({
+                where: { id: { in: unidadeIds.map(Number) } }
+            })
+            if (units.length > 0) {
+                unitIdToSave = Number(unidadeIds[0])
+                unitTextToSave = units.map(u => u.sigla).join(', ')
+            }
+        }
+
         const data = await prisma.produto.create({
             data: {
                 nome,
                 categoriaId: categoriaId ? Number(categoriaId) : undefined,
-                unidadeId: unidadeId ? Number(unidadeId) : undefined,
-                unidadeTexto: unidadeLegacy || undefined,
+                unidadeId: unitIdToSave,
+                unidadeTexto: unitTextToSave || unidadeLegacy || undefined,
                 unidades: {
                     connect: (Array.isArray(unidadeIds) && unidadeIds.length > 0)
                         ? unidadeIds.map((id: number) => ({ id: Number(id) }))
