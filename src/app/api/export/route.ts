@@ -82,6 +82,19 @@ export async function GET(request: Request) {
         // Create workbook
         const wb = XLSX.utils.book_new()
 
+        // Helper masks
+        const maskCNPJ = (v: string | null) => {
+            if (!v) return ''
+            const n = v.replace(/\D/g, '')
+            return n.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
+        }
+        const maskPhone = (v: string | null) => {
+            if (!v) return ''
+            const n = v.replace(/\D/g, '')
+            if (n.length === 11) return n.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')
+            return n.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3')
+        }
+
         // Sheet 1: Relatório Geral (Filtered)
         const relatorioData: Record<string, string | number | null>[] = []
         filteredPropostas.forEach((p: any) => {
@@ -91,6 +104,10 @@ export async function GET(request: Request) {
                     'Município': p.licitacao?.municipio?.nomeCompleto || '-',
                     'Licitação': p.licitacao?.nome || '',
                     'Fornecedor': p.fornecedor?.nome || '',
+                    'Forn. Contato': p.fornecedor?.contato || '',
+                    'Forn. WhatsApp': maskPhone(p.fornecedor?.whatsapp),
+                    'Forn. Email': p.fornecedor?.email || '',
+                    'Forn. CNPJ': maskCNPJ(p.fornecedor?.cnpj),
                     'Produto': item.produto?.nome || '',
                     'Categoria': item.produto?.categoria?.nome || '-',
                     'Unidade': item.unidade?.sigla || item.produto?.unidades?.[0]?.sigla || item.produto?.unidadeTexto || '-',
@@ -119,18 +136,6 @@ export async function GET(request: Request) {
         XLSX.utils.book_append_sheet(wb, wsLicitacoes, 'Licitações')
 
         // Sheet 3: Fornecedores
-        const maskCNPJ = (v: string | null) => {
-            if (!v) return ''
-            const n = v.replace(/\D/g, '')
-            return n.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
-        }
-        const maskPhone = (v: string | null) => {
-            if (!v) return ''
-            const n = v.replace(/\D/g, '')
-            if (n.length === 11) return n.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')
-            return n.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3')
-        }
-
         const fornecedoresData = fornecedores.map((f: any) => ({
             ID: f.id,
             Nome: f.nome,
@@ -159,6 +164,10 @@ export async function GET(request: Request) {
             'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
             Licitação: p.licitacao?.nome || '',
             Fornecedor: p.fornecedor?.nome || '',
+            'Forn. Contato': p.fornecedor?.contato || '',
+            'Forn. WhatsApp': maskPhone(p.fornecedor?.whatsapp),
+            'Forn. Email': p.fornecedor?.email || '',
+            'Forn. CNPJ': maskCNPJ(p.fornecedor?.cnpj),
             'Total Itens': p.itens?.length || 0,
             'Valor Total': p.itens?.reduce((acc: number, item: any) => acc + (item.precoTotal || 0), 0) || 0,
             'Obs Fornecedor': p.fornecedor?.observacoes || '',
@@ -176,6 +185,10 @@ export async function GET(request: Request) {
                     'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
                     'Licitação': p.licitacao?.nome || '',
                     'Fornecedor': p.fornecedor?.nome || '',
+                    'Forn. Contato': p.fornecedor?.contato || '',
+                    'Forn. WhatsApp': maskPhone(p.fornecedor?.whatsapp),
+                    'Forn. Email': p.fornecedor?.email || '',
+                    'Forn. CNPJ': maskCNPJ(p.fornecedor?.cnpj),
                     'Produto': item.produto?.nome || '',
                     'Categoria': item.produto?.categoria?.nome || '-',
                     'Unidade': item.unidade?.sigla || item.produto?.unidades?.[0]?.sigla || item.produto?.unidadeTexto || '-',
