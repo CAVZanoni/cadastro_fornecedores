@@ -27,7 +27,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { nome, categoriaId, unidadeId, unidadeIds, unidadeLegacy } = body
+        const { nome, categoriaId, unidadeIds, unidadeLegacy } = body
 
         if (!nome) return NextResponse.json({ error: 'Nome é obrigatório' }, { status: 400 })
 

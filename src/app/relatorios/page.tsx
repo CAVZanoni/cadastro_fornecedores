@@ -19,7 +19,7 @@ type ReportItem = {
     obsItem?: string
 }
 
-const SortIcon = ({ column, sortConfig }: { column: any, sortConfig: { key: keyof ReportItem | null, direction: 'asc' | 'desc' } }) => {
+const SortIcon = ({ column, sortConfig }: { column: keyof ReportItem, sortConfig: { key: keyof ReportItem | null, direction: 'asc' | 'desc' } }) => {
     if (sortConfig.key !== column) return <div className="w-4 h-4 opacity-0 group-hover:opacity-30 transition-opacity"><ArrowUpDown size={14} /></div>
     return <div className={`w-4 h-4 transition-transform ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`}><ArrowUpDown size={14} /></div>
 }
