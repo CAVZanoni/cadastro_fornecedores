@@ -82,7 +82,15 @@ export default function RelatoriosPage() {
     }
 
     function handleExport() {
-        window.location.href = '/api/export'
+        const params = new URLSearchParams()
+        if (search) params.append('search', search)
+        if (dateStart) params.append('dateStart', dateStart)
+        if (dateEnd) params.append('dateEnd', dateEnd)
+        if (selectedMunicipio) params.append('municipio', selectedMunicipio)
+        if (selectedFornecedor) params.append('fornecedor', selectedFornecedor)
+        if (selectedLicitacao) params.append('licitacao', selectedLicitacao)
+
+        window.location.href = `/api/export?${params.toString()}`
     }
 
     // Unique values for dropdowns
@@ -272,7 +280,7 @@ export default function RelatoriosPage() {
                                         <td className="p-2 text-slate-600 text-right font-mono">
                                             {item.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
                                         </td>
-                                        <td className="p-2 text-slate-600 text-right font-mono">{formatCurrency(item.precoUnitario)}</td>
+                                        <td className="p-2 text-slate-900 text-right font-mono font-bold">{formatCurrency(item.precoUnitario)}</td>
                                         <td className="p-2 text-slate-900 text-right font-mono font-bold">{formatCurrency(item.precoTotal)}</td>
                                         <td className="p-2 text-slate-500 text-[10px] italic space-y-0.5 max-w-[150px] overflow-hidden">
                                             {item.obsProp && <div className="truncate" title={`Proposta: ${item.obsProp}`}>P: {item.obsProp}</div>}

@@ -18,11 +18,19 @@ export async function PUT(
                 nome: json.nome,
                 categoriaId: json.categoriaId ? Number(json.categoriaId) : undefined,
                 unidadeId: json.unidadeId ? Number(json.unidadeId) : undefined,
-                unidadeTexto: json.unidadeLegacy || undefined
+                unidadeTexto: json.unidadeLegacy || undefined,
+                unidades: {
+                    set: Array.isArray(json.unidadeIds)
+                        ? json.unidadeIds.map((uid: any) => ({ id: Number(uid) }))
+                        : []
+                }
             },
             include: {
                 categoria: true,
-                unidade: true
+                unidade: true,
+                unidades: {
+                    orderBy: { sigla: 'asc' }
+                }
             }
         })
 
@@ -38,7 +46,8 @@ export async function PUT(
         }
 
         return NextResponse.json(updated)
-    } catch {
+    } catch (error) {
+        console.error('Error updating product:', error)
         return NextResponse.json({ error: 'Erro ao atualizar produto' }, { status: 500 })
     }
 }

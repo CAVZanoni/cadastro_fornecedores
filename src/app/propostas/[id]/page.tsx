@@ -12,6 +12,8 @@ type ItemProposta = {
         unidade?: { sigla: string } | null
         unidadeTexto?: string | null
     }
+    unidadeId?: number | null
+    unidade?: { sigla: string; nome: string } | null
     quantidade: number
     precoUnitario: number
     precoTotal: number
@@ -32,6 +34,7 @@ type ProdutoOption = {
     id: number
     nome: string
     unidade?: { sigla: string; nome: string } | null
+    unidades?: { id: number; sigla: string; nome: string }[] | null
     unidadeTexto?: string | null
 }
 
@@ -48,6 +51,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
     // Item Form
     const [form, setForm] = useState({
         produtoId: '',
+        unidadeId: '',
         quantidade: '',
         precoUnitario: '',
         observacoes: ''
@@ -73,6 +77,10 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
         fetchData()
     }, [fetchData])
 
+    // Derived state: allowed units for selected product
+    const selectedProduct = produtos.find(p => p.id === Number(form.produtoId))
+    const allowedUnits = selectedProduct?.unidades || []
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         if (!form.produtoId || !form.quantidade || !form.precoUnitario) return
@@ -87,6 +95,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                 body: JSON.stringify({
                     propostaId: id,
                     produtoId: form.produtoId,
+                    unidadeId: form.unidadeId || null,
                     quantidade: form.quantidade,
                     precoUnitario: form.precoUnitario,
                     observacoes: form.observacoes
@@ -102,7 +111,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
     }
 
     function resetForm() {
-        setForm({ produtoId: '', quantidade: '', precoUnitario: '', observacoes: '' })
+        setForm({ produtoId: '', unidadeId: '', quantidade: '', precoUnitario: '', observacoes: '' })
         setEditId(null)
     }
 
@@ -110,6 +119,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
         setEditId(item.id)
         setForm({
             produtoId: String(item.produtoId),
+            unidadeId: item.unidadeId ? String(item.unidadeId) : '',
             quantidade: String(item.quantidade),
             precoUnitario: String(item.precoUnitario),
             observacoes: item.observacoes || ''
@@ -219,18 +229,44 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                     </h3>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                            <div className="md:col-span-5">
+                            <div className="md:col-span-4">
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Produto</label>
                                 <select
                                     value={form.produtoId}
-                                    onChange={e => setForm({ ...form, produtoId: e.target.value })}
+                                    onChange={e => {
+                                        const prodId = e.target.value
+                                        const prod = produtos.find(p => p.id === Number(prodId))
+                                        setForm({
+                                            ...form,
+                                            produtoId: prodId,
+                                            unidadeId: prod?.unidades?.[0]?.id.toString() || ''
+                                        })
+                                    }}
                                     className="w-full rounded-md border border-slate-300 p-2 text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500"
                                     required
                                 >
                                     <option value="">Selecione...</option>
                                     {produtos.map(p => (
-                                        <option key={p.id} value={p.id}>{p.nome} ({p.unidade?.sigla || p.unidadeTexto || '-'})</option>
+                                        <option key={p.id} value={p.id}>{p.nome}</option>
                                     ))}
+                                </select>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Unidade</label>
+                                <select
+                                    value={form.unidadeId}
+                                    onChange={e => setForm({ ...form, unidadeId: e.target.value })}
+                                    className="w-full rounded-md border border-slate-300 p-2 text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50"
+                                    required
+                                    disabled={!form.produtoId}
+                                >
+                                    <option value="">Selecione...</option>
+                                    {allowedUnits.map(u => (
+                                        <option key={u.id} value={u.id}>{u.sigla}</option>
+                                    ))}
+                                    {form.produtoId && allowedUnits.length === 0 && (
+                                        <option value="" disabled>Nenhuma unidade vinculada</option>
+                                    )}
                                 </select>
                             </div>
                             <div className="md:col-span-2">
@@ -244,7 +280,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                                     required
                                 />
                             </div>
-                            <div className="md:col-span-3">
+                            <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Preço Unit. (R$)</label>
                                 <input
                                     type="number"
@@ -308,7 +344,7 @@ export default function PropostaDetalhe({ params }: { params: Promise<{ id: stri
                                 <tr key={item.id} className={`hover:bg-slate-50 ${editId === item.id ? 'bg-blue-50' : ''}`}>
                                     <td className="p-4 font-medium text-slate-800">
                                         {item.produto?.nome}
-                                        <span className="text-slate-400 font-normal ml-1">({item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-'})</span>
+                                        <span className="text-slate-400 font-normal ml-1">({item.unidade?.sigla || item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-'})</span>
                                     </td>
                                     <td className="p-4 text-right text-slate-600">
                                         {item.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}

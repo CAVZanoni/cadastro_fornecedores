@@ -5,19 +5,37 @@ import * as XLSX from 'xlsx'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        // Fetch all data with relations
-        const licitacoes = await prisma.licitacao.findMany({
-            include: { municipio: true },
-            orderBy: { id: 'asc' }
-        })
-        const fornecedores = await prisma.fornecedor.findMany({ orderBy: { id: 'asc' } })
-        const produtos = await prisma.produto.findMany({
-            include: { categoria: true, unidade: true },
-            orderBy: { id: 'asc' }
-        })
+        const { searchParams } = new URL(request.url)
+        const search = searchParams.get('search')
+        const dateStart = searchParams.get('dateStart')
+        const dateEnd = searchParams.get('dateEnd')
+        const municipio = searchParams.get('municipio')
+        const fornecedor = searchParams.get('fornecedor')
+        const licitacao = searchParams.get('licitacao')
+
+        // Build filter where clause
+        const where: any = {}
+
+        if (municipio) {
+            where.licitacao = { municipio: { nomeCompleto: municipio } }
+        }
+        if (fornecedor) {
+            where.fornecedor = { nome: fornecedor }
+        }
+        if (licitacao) {
+            where.licitacao = { ...where.licitacao, nome: licitacao }
+        }
+        if (dateStart || dateEnd) {
+            where.data = {}
+            if (dateStart) where.data.gte = new Date(dateStart)
+            if (dateEnd) where.data.lte = new Date(dateEnd)
+        }
+
+        // Fetch propostas with filtering
         const propostas = await prisma.proposta.findMany({
+            where,
             include: {
                 licitacao: { include: { municipio: true } },
                 fornecedor: true,
@@ -32,12 +50,40 @@ export async function GET() {
             orderBy: { id: 'asc' }
         })
 
+        // Apply search filter manually as it's complex for Prisma across relations
+        let filteredPropostas = propostas
+        if (search) {
+            const terms = search.toLowerCase().split(' ')
+            filteredPropostas = propostas.filter(p => {
+                return p.itens.some(item => {
+                    return terms.every(term =>
+                        item.produto.nome.toLowerCase().includes(term) ||
+                        p.licitacao.nome.toLowerCase().includes(term) ||
+                        p.fornecedor.nome.toLowerCase().includes(term) ||
+                        (p.observacoes?.toLowerCase().includes(term)) ||
+                        (item.observacoes?.toLowerCase().includes(term))
+                    )
+                })
+            })
+        }
+
+        // Fetch auxiliary data for other sheets (unfiltered by user search for reference)
+        const licitacoes = await prisma.licitacao.findMany({
+            include: { municipio: true },
+            orderBy: { id: 'asc' }
+        })
+        const fornecedores = await prisma.fornecedor.findMany({ orderBy: { id: 'asc' } })
+        const produtos = await prisma.produto.findMany({
+            include: { categoria: true, unidade: true },
+            orderBy: { id: 'asc' }
+        })
+
         // Create workbook
         const wb = XLSX.utils.book_new()
 
-        // Sheet 1: Relatório Geral (Flattened)
+        // Sheet 1: Relatório Geral (Filtered)
         const relatorioData: Record<string, string | number | null>[] = []
-        propostas.forEach((p: any) => {
+        filteredPropostas.forEach((p: any) => {
             p.itens?.forEach((item: any) => {
                 relatorioData.push({
                     'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
@@ -52,7 +98,8 @@ export async function GET() {
                     'Preço Total': item.precoTotal || 0,
                     'Obs Fornecedor': p.fornecedor?.observacoes || '',
                     'Obs Proposta': p.observacoes || '',
-                    'Obs Item': item.observacoes || ''
+                    'Obs Item': item.observacoes || '',
+                    'Link Anexo': p.arquivoUrl || '-'
                 })
             })
         })
@@ -106,7 +153,7 @@ export async function GET() {
         XLSX.utils.book_append_sheet(wb, wsProdutos, 'Produtos')
 
         // Sheet 5: Propostas
-        const propostasData = propostas.map((p: any) => ({
+        const propostasData = filteredPropostas.map((p: any) => ({
             ID: p.id,
             'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
             Licitação: p.licitacao?.nome || '',
@@ -114,14 +161,15 @@ export async function GET() {
             'Total Itens': p.itens?.length || 0,
             'Valor Total': p.itens?.reduce((acc: number, item: any) => acc + (item.precoTotal || 0), 0) || 0,
             'Obs Fornecedor': p.fornecedor?.observacoes || '',
-            'Obs': p.observacoes || ''
+            'Obs': p.observacoes || '',
+            'Link Anexo': p.arquivoUrl || '-'
         }))
         const wsPropostas = XLSX.utils.json_to_sheet(propostasData)
         XLSX.utils.book_append_sheet(wb, wsPropostas, 'Propostas')
 
         // Sheet 6: Itens de Propostas (detalhado)
         const itensData: Record<string, string | number | null>[] = []
-        propostas.forEach((p: any) => {
+        filteredPropostas.forEach((p: any) => {
             p.itens?.forEach((item: any) => {
                 itensData.push({
                     'Data': p.data ? new Date(p.data).toISOString().split('T')[0] : '',
@@ -135,7 +183,8 @@ export async function GET() {
                     'Preço Total': item.precoTotal || 0,
                     'Obs Fornecedor': p.fornecedor?.observacoes || '',
                     'Obs Proposta': p.observacoes || '',
-                    'Obs Item': item.observacoes || ''
+                    'Obs Item': item.observacoes || '',
+                    'Link Anexo': p.arquivoUrl || '-'
                 })
             })
         })

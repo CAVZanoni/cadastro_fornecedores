@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
-import { Plus, X, Pencil, Trash2 } from 'lucide-react'
+import { Plus, X, Pencil, Trash2, ArrowUpDown, Search } from 'lucide-react'
 
 type Municipio = {
     id: number
@@ -32,6 +32,36 @@ export default function LicitacoesPage() {
     const [municipioResults, setMunicipioResults] = useState<Municipio[]>([])
     const [selectedMunicipio, setSelectedMunicipio] = useState<Municipio | null>(null)
     const [showResults, setShowResults] = useState(false)
+    const [search, setSearch] = useState('')
+    const [sortConfig, setSortConfig] = useState<{ key: keyof Licitacao | 'municipio_nome', direction: 'asc' | 'desc' }>({ key: 'id', direction: 'desc' })
+
+    const ThSort = ({ column, label, align = 'left', width }: {
+        column: keyof Licitacao | 'municipio_nome',
+        label: string,
+        align?: 'left' | 'right' | 'center',
+        width?: string
+    }) => (
+        <th
+            className={`p-4 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors select-none group ${width} text-${align}`}
+            onClick={() => handleSort(column)}
+        >
+            <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : align === 'center' ? 'justify-center' : 'justify-start'}`}>
+                {label}
+                {sortConfig.key === column ? (
+                    <ArrowUpDown size={14} className={`transition-transform ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`} />
+                ) : (
+                    <ArrowUpDown size={14} className="opacity-0 group-hover:opacity-30" />
+                )}
+            </div>
+        </th>
+    )
+
+    const handleSort = (key: keyof Licitacao | 'municipio_nome') => {
+        setSortConfig(current => ({
+            key,
+            direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+        }))
+    }
 
     useEffect(() => {
         fetchLicitacoes()
@@ -142,11 +172,46 @@ export default function LicitacoesPage() {
         }
     }
 
+    const filteredLicitacoes = licitacoes.filter(lic => {
+        const matchesSearch = search.toLowerCase().split(' ').every(term =>
+            lic.nome.toLowerCase().includes(term) ||
+            lic.municipio?.nomeCompleto.toLowerCase().includes(term)
+        )
+        return matchesSearch
+    })
+
+    const sortedLicitacoes = [...filteredLicitacoes].sort((a, b) => {
+        let aVal: any = a[sortConfig.key as keyof Licitacao]
+        let bVal: any = b[sortConfig.key as keyof Licitacao]
+
+        if (sortConfig.key === 'municipio_nome') {
+            aVal = a.municipio?.nomeCompleto || ''
+            bVal = b.municipio?.nomeCompleto || ''
+        }
+
+        if (aVal === bVal) return 0
+        if (aVal === null || aVal === undefined) return 1
+        if (bVal === null || bVal === undefined) return -1
+
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
+        return sortConfig.direction === 'asc' ? 1 : -1
+    })
+
     return (
         <div className="h-full overflow-auto p-8">
             <div className="max-w-7xl mx-auto space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     <h1 className="text-3xl font-bold text-slate-800">Licitações</h1>
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar licitações..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value.toUpperCase())}
+                            className="w-full pl-10 pr-4 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        />
+                    </div>
                 </div>
 
                 <Card>
@@ -253,20 +318,20 @@ export default function LicitacoesPage() {
                         <table className="w-full text-left">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="p-4 font-semibold text-slate-600 w-20">ID</th>
-                                    <th className="p-4 font-semibold text-slate-600">Nome</th>
-                                    <th className="p-4 font-semibold text-slate-600">Município</th>
-                                    <th className="p-4 font-semibold text-slate-600 w-40">Data</th>
+                                    <ThSort column="id" label="ID" width="w-20" />
+                                    <ThSort column="nome" label="Nome" />
+                                    <ThSort column="municipio_nome" label="Município" />
+                                    <ThSort column="data" label="Data" width="w-40" />
                                     <th className="p-4 font-semibold text-slate-600 text-right w-24">Ações</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {loading ? (
                                     <tr><td colSpan={5} className="p-8 text-center text-slate-500">Carregando...</td></tr>
-                                ) : licitacoes.length === 0 ? (
-                                    <tr><td colSpan={5} className="p-8 text-center text-slate-500">Nenhuma licitação cadastrada.</td></tr>
+                                ) : sortedLicitacoes.length === 0 ? (
+                                    <tr><td colSpan={5} className="p-8 text-center text-slate-500">Nenhuma licitação encontrada.</td></tr>
                                 ) : (
-                                    licitacoes.map((lic) => (
+                                    sortedLicitacoes.map((lic) => (
                                         <tr key={lic.id} className={`hover:bg-slate-50 transition-colors ${editId === lic.id ? 'bg-blue-50' : ''}`}>
                                             <td className="p-4 text-slate-500">#{lic.id}</td>
                                             <td className="p-4 font-medium text-slate-900">{lic.nome}</td>

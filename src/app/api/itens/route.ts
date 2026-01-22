@@ -7,7 +7,7 @@ import { authOptions } from '@/lib/auth'
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { propostaId, produtoId, quantidade, precoUnitario } = body
+        const { propostaId, produtoId, unidadeId, quantidade, precoUnitario } = body
 
         if (!propostaId || !produtoId || quantidade === undefined || precoUnitario === undefined) {
             return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
@@ -21,12 +21,16 @@ export async function POST(request: Request) {
             data: {
                 propostaId: Number(propostaId),
                 produtoId: Number(produtoId),
+                unidadeId: unidadeId ? Number(unidadeId) : undefined,
                 quantidade: qtd,
                 precoUnitario: price,
                 precoTotal: total,
                 observacoes: body.observacoes || undefined
             },
-            include: { produto: true }
+            include: {
+                produto: true,
+                unidade: true
+            }
         })
 
         const session = await getServerSession(authOptions)

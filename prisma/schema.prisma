@@ -46,7 +46,11 @@ model UnidadeMedida {
   id        Int      @id @default(autoincrement())
   sigla     String   @unique // ex: kg, un, m
   nome      String?         // ex: Kilograma, Unidade
-  produtos  Produto[]
+  
+  produtos       Produto[] @relation("ProdutoUnits")
+  produtosLegado Produto[] @relation("LegacyUnit")
+  itens          ItemProposta[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -58,10 +62,12 @@ model Produto {
   categoriaId Int?
   categoria   CategoriaProduto? @relation(fields: [categoriaId], references: [id])
   
-  unidadeId   Int?
-  unidade     UnidadeMedida?    @relation(fields: [unidadeId], references: [id])
+  // Relação muitos-para-muitos com unidades
+  unidades    UnidadeMedida[]   @relation("ProdutoUnits")
   
   // Campo legado para compatibilidade durante migração
+  unidadeId   Int?
+  unidade     UnidadeMedida?    @relation("LegacyUnit", fields: [unidadeId], references: [id])
   unidadeTexto String? @map("unidade") 
 
   itens     ItemProposta[]
@@ -94,6 +100,9 @@ model ItemProposta {
   proposta      Proposta @relation(fields: [propostaId], references: [id], onDelete: Cascade)
   produtoId     Int
   produto       Produto  @relation(fields: [produtoId], references: [id])
+  
+  unidadeId     Int?
+  unidade       UnidadeMedida? @relation(fields: [unidadeId], references: [id])
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/Card'
-import { Plus, Pencil, Trash2, MessageCircle } from 'lucide-react'
+import { Plus, Pencil, Trash2, MessageCircle, ArrowUpDown, Search } from 'lucide-react'
 
 type Fornecedor = {
     id: number
@@ -19,6 +19,36 @@ export default function FornecedoresPage() {
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [editId, setEditId] = useState<number | null>(null)
+    const [search, setSearch] = useState('')
+    const [sortConfig, setSortConfig] = useState<{ key: keyof Fornecedor, direction: 'asc' | 'desc' }>({ key: 'nome', direction: 'asc' })
+
+    const ThSort = ({ column, label, align = 'left', width }: {
+        column: keyof Fornecedor,
+        label: string,
+        align?: 'left' | 'right' | 'center',
+        width?: string
+    }) => (
+        <th
+            className={`p-4 font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors select-none group ${width} text-${align}`}
+            onClick={() => handleSort(column)}
+        >
+            <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : align === 'center' ? 'justify-center' : 'justify-start'}`}>
+                {label}
+                {sortConfig.key === column ? (
+                    <ArrowUpDown size={14} className={`transition-transform ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`} />
+                ) : (
+                    <ArrowUpDown size={14} className="opacity-0 group-hover:opacity-30" />
+                )}
+            </div>
+        </th>
+    )
+
+    const handleSort = (key: keyof Fornecedor) => {
+        setSortConfig(current => ({
+            key,
+            direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+        }))
+    }
 
     // Form State
     const [form, setForm] = useState({
@@ -129,10 +159,41 @@ export default function FornecedoresPage() {
         }
     }
 
+    const filteredData = data.filter(item => {
+        const matchesSearch = search.toLowerCase().split(' ').every(term =>
+            item.nome.toLowerCase().includes(term) ||
+            (item.cnpj && item.cnpj.toLowerCase().includes(term)) ||
+            (item.email && item.email.toLowerCase().includes(term)) ||
+            (item.contato && item.contato.toLowerCase().includes(term))
+        )
+        return matchesSearch
+    })
+
+    const sortedData = [...filteredData].sort((a, b) => {
+        const aVal: any = a[sortConfig.key] || ''
+        const bVal: any = b[sortConfig.key] || ''
+
+        if (aVal === bVal) return 0
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1
+        return sortConfig.direction === 'asc' ? 1 : -1
+    })
+
     return (
         <div className="h-full overflow-auto p-8">
             <div className="max-w-7xl mx-auto space-y-6">
-                <h1 className="text-3xl font-bold text-slate-800">Fornecedores</h1>
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h1 className="text-3xl font-bold text-slate-800">Fornecedores</h1>
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Buscar fornecedores..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value.toUpperCase())}
+                            className="w-full pl-10 pr-4 py-2 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        />
+                    </div>
+                </div>
 
                 <Card>
                     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
@@ -225,21 +286,21 @@ export default function FornecedoresPage() {
                         <table className="w-full text-left bg-white">
                             <thead className="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th className="p-4 font-semibold text-slate-600">Nome</th>
-                                    <th className="p-4 font-semibold text-slate-600">Contato</th>
-                                    <th className="p-4 font-semibold text-slate-600">WhatsApp</th>
-                                    <th className="p-4 font-semibold text-slate-600">CNPJ</th>
-                                    <th className="p-4 font-semibold text-slate-600">Observações</th>
+                                    <ThSort column="nome" label="Nome" />
+                                    <ThSort column="contato" label="Contato" />
+                                    <ThSort column="whatsapp" label="WhatsApp" />
+                                    <ThSort column="cnpj" label="CNPJ" />
+                                    <ThSort column="observacoes" label="Observações" />
                                     <th className="p-4 font-semibold text-slate-600 text-right w-24">Ações</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {loading ? (
                                     <tr><td colSpan={6} className="p-8 text-center text-slate-500">Carregando...</td></tr>
-                                ) : data.length === 0 ? (
-                                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nenhum fornecedor cadastrado.</td></tr>
+                                ) : sortedData.length === 0 ? (
+                                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">Nenhum fornecedor encontrado.</td></tr>
                                 ) : (
-                                    data.map((item) => (
+                                    sortedData.map((item) => (
                                         <tr key={item.id} className={`hover:bg-slate-50 transition-colors ${editId === item.id ? 'bg-blue-50' : ''}`}>
                                             <td className="p-4 font-medium text-slate-900">
                                                 {item.nome}

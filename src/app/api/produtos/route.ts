@@ -11,7 +11,10 @@ export async function GET() {
         const data = await prisma.produto.findMany({
             include: {
                 categoria: true,
-                unidade: true
+                unidade: true,
+                unidades: {
+                    orderBy: { sigla: 'asc' }
+                }
             },
             orderBy: { createdAt: 'desc' }
         })
@@ -24,7 +27,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { nome, categoriaId, unidadeId, unidadeLegacy } = body
+        const { nome, categoriaId, unidadeId, unidadeIds, unidadeLegacy } = body
 
         if (!nome) return NextResponse.json({ error: 'Nome é obrigatório' }, { status: 400 })
 
@@ -33,11 +36,17 @@ export async function POST(request: Request) {
                 nome,
                 categoriaId: categoriaId ? Number(categoriaId) : undefined,
                 unidadeId: unidadeId ? Number(unidadeId) : undefined,
-                unidadeTexto: unidadeLegacy || undefined
+                unidadeTexto: unidadeLegacy || undefined,
+                unidades: {
+                    connect: (Array.isArray(unidadeIds) && unidadeIds.length > 0)
+                        ? unidadeIds.map((id: any) => ({ id: Number(id) }))
+                        : undefined
+                }
             },
             include: {
                 categoria: true,
-                unidade: true
+                unidade: true,
+                unidades: true
             }
         })
 
@@ -53,7 +62,8 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json(data)
-    } catch {
+    } catch (error) {
+        console.error('Error creating product:', error)
         return NextResponse.json({ error: 'Erro ao criar produto' }, { status: 500 })
     }
 }

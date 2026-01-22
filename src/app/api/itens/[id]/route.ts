@@ -12,15 +12,24 @@ export async function PUT(
         const { id } = await params
         const json = await request.json()
 
+        const qtd = Number(json.quantidade)
+        const price = Number(json.precoUnitario)
+        const total = qtd * price
+
         const updated = await prisma.itemProposta.update({
             where: { id: Number(id) },
             data: {
                 produtoId: Number(json.produtoId),
-                quantidade: Number(json.quantidade),
-                precoUnitario: Number(json.precoUnitario),
+                unidadeId: json.unidadeId ? Number(json.unidadeId) : undefined,
+                quantidade: qtd,
+                precoUnitario: price,
+                precoTotal: total,
                 observacoes: json.observacoes || undefined
             },
-            include: { produto: true }
+            include: {
+                produto: true,
+                unidade: true
+            }
         })
 
         const session = await getServerSession(authOptions)
