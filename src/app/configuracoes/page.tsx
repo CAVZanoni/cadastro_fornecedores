@@ -83,6 +83,32 @@ export default function ConfiguracoesPage() {
         }
     }
 
+    async function handleDeleteCat(id: number) {
+        if (!confirm('Excluir esta categoria?')) return
+        try {
+            const res = await fetch(`/api/categorias/${id}`, { method: 'DELETE' })
+            if (res.ok) {
+                fetchCategorias()
+            } else {
+                const data = await res.json()
+                alert(data.error || 'Erro ao excluir')
+            }
+        } catch { alert('Erro ao excluir') }
+    }
+
+    async function handleDeleteUni(id: number) {
+        if (!confirm('Excluir esta unidade?')) return
+        try {
+            const res = await fetch(`/api/unidades/${id}`, { method: 'DELETE' })
+            if (res.ok) {
+                fetchUnidades()
+            } else {
+                const data = await res.json()
+                alert(data.error || 'Erro ao excluir')
+            }
+        } catch { alert('Erro ao excluir') }
+    }
+
     return (
         <div className="h-full overflow-auto p-8">
             <div className="max-w-7xl mx-auto space-y-8">
@@ -129,7 +155,10 @@ export default function ConfiguracoesPage() {
                                             <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
                                                 <td className="p-4">{cat.nome}</td>
                                                 <td className="p-4 text-right">
-                                                    <button className="text-slate-400 hover:text-red-500 p-1">
+                                                    <button
+                                                        onClick={() => handleDeleteCat(cat.id)}
+                                                        className="text-slate-400 hover:text-red-500 p-1"
+                                                    >
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </td>
@@ -191,7 +220,10 @@ export default function ConfiguracoesPage() {
                                                 <td className="p-4 font-bold">{uni.sigla}</td>
                                                 <td className="p-4 text-slate-600">{uni.nome || '-'}</td>
                                                 <td className="p-4 text-right">
-                                                    <button className="text-slate-400 hover:text-red-500 p-1">
+                                                    <button
+                                                        onClick={() => handleDeleteUni(uni.id)}
+                                                        className="text-slate-400 hover:text-red-500 p-1"
+                                                    >
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </td>

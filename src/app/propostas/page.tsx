@@ -14,6 +14,7 @@ type Proposta = {
     data: string // Manual date
     arquivoUrl?: string | null
     observacoes?: string | null
+    itens?: { id: number }[]
 }
 
 type Option = { id: number, nome: string }
@@ -247,6 +248,7 @@ export default function PropostasPage() {
                                 <th className="p-4 font-semibold text-slate-600">Fornecedor</th>
                                 <th className="p-4 font-semibold text-slate-600 w-32">Data</th>
                                 <th className="p-4 font-semibold text-slate-600">Obs.</th>
+                                <th className="p-4 font-semibold text-slate-600 text-center">Itens</th>
                                 <th className="p-4 font-semibold text-slate-600 text-right w-56">Ações</th>
                             </tr>
                         </thead>
@@ -267,6 +269,17 @@ export default function PropostasPage() {
                                         </td>
                                         <td className="p-4 text-slate-600 text-sm max-w-[200px] truncate" title={item.observacoes || ''}>
                                             {item.observacoes}
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            {item.itens && item.itens.length > 0 ? (
+                                                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200" title={`${item.itens.length} itens`}>
+                                                    {item.itens.length}
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-400 border border-slate-200">
+                                                    0
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex justify-end items-center gap-3">

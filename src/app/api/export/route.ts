@@ -41,8 +41,9 @@ export async function GET(request: Request) {
                 fornecedor: true,
                 itens: {
                     include: {
+                        unidade: true,
                         produto: {
-                            include: { categoria: true, unidade: true }
+                            include: { categoria: true, unidades: true }
                         }
                     }
                 }
@@ -74,7 +75,7 @@ export async function GET(request: Request) {
         })
         const fornecedores = await prisma.fornecedor.findMany({ orderBy: { id: 'asc' } })
         const produtos = await prisma.produto.findMany({
-            include: { categoria: true, unidade: true },
+            include: { categoria: true, unidades: true },
             orderBy: { id: 'asc' }
         })
 
@@ -92,7 +93,7 @@ export async function GET(request: Request) {
                     'Fornecedor': p.fornecedor?.nome || '',
                     'Produto': item.produto?.nome || '',
                     'Categoria': item.produto?.categoria?.nome || '-',
-                    'Unidade': item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-',
+                    'Unidade': item.unidade?.sigla || item.produto?.unidades?.[0]?.sigla || item.produto?.unidadeTexto || '-',
                     'Quantidade': item.quantidade,
                     'Preço Unitário': item.precoUnitario,
                     'Preço Total': item.precoTotal || 0,
@@ -147,7 +148,7 @@ export async function GET(request: Request) {
             ID: p.id,
             Nome: p.nome,
             Categoria: p.categoria?.nome || '-',
-            Unidade: p.unidade?.sigla || p.unidadeTexto || '-'
+            Unidades: p.unidades?.map((u: any) => u.sigla).join(', ') || '-'
         }))
         const wsProdutos = XLSX.utils.json_to_sheet(produtosData)
         XLSX.utils.book_append_sheet(wb, wsProdutos, 'Produtos')
@@ -177,7 +178,7 @@ export async function GET(request: Request) {
                     'Fornecedor': p.fornecedor?.nome || '',
                     'Produto': item.produto?.nome || '',
                     'Categoria': item.produto?.categoria?.nome || '-',
-                    'Unidade': item.produto?.unidade?.sigla || item.produto?.unidadeTexto || '-',
+                    'Unidade': item.unidade?.sigla || item.produto?.unidades?.[0]?.sigla || item.produto?.unidadeTexto || '-',
                     'Quantidade': item.quantidade,
                     'Preço Unitário': item.precoUnitario,
                     'Preço Total': item.precoTotal || 0,

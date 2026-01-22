@@ -16,7 +16,8 @@ export async function GET() {
                     include: {
                         produto: {
                             include: { unidade: true }
-                        }
+                        },
+                        unidade: true
                     }
                 }
             },
